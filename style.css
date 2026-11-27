@@ -100,9 +100,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .cinema.on .stage:not(.sharing) .cineHint{display:grid}
 .cinema.on .stageMsg{display:none}
 .cineHint{position:absolute;inset:0;place-items:center;text-align:center;padding:24px;color:#fff;font:500 calc(26px*var(--dsz))/1.3 var(--disp);z-index:1;pointer-events:none}
-.cinema.on .vremote,.cinema.on .stage.sharing .vremote{inset:auto;top:14px;right:14px;left:auto;bottom:auto;width:130px;height:130px;aspect-ratio:1;border-radius:50%;border:3px solid #fff;z-index:3;box-shadow:0 0 0 calc(var(--lvl,0) * 12px) #4ade80cc,0 6px 20px #0006}
-.cinema.on .vlocal{top:154px;right:30px;bottom:auto;width:96px;height:96px;aspect-ratio:1;border-radius:50%;border:3px solid var(--a);box-shadow:0 0 0 calc(var(--lvl,0) * 12px) #4ade80cc,0 6px 20px #0006}
 .chatPanel{flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;min-height:0;max-height:100%}
+.faces{display:flex;gap:14px;justify-content:center;align-items:center;padding:14px 12px;border-bottom:1px solid var(--line);background:linear-gradient(var(--bg),var(--card))}
+.faces video{position:static!important;inset:auto!important;width:118px;height:118px;aspect-ratio:1;border-radius:50%;object-fit:cover;background:#0b0d1a;border:3px solid #fff;box-shadow:0 0 0 calc(var(--lvl,0) * 12px) #4ade80cc,0 6px 18px #0004;flex:none}
+.faces .vlocal{width:84px;height:84px;border-color:var(--a)}
+.cinema:fullscreen .faces{background:#0b0d1f;border-color:#2a2d55}
 .chatHead{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
 .chatHead b{font:700 calc(24px*var(--dsz))/1 var(--disp);color:var(--b)}
 .chatList{list-style:none;margin:0;padding:10px 12px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:120px}
@@ -126,7 +128,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .cinema:fullscreen .chatPanel{background:#12142a;color:#f3eee4;border-color:#2a2d55}
 .cinema:fullscreen .chatList li:not(.me){background:#1d2048;border-color:#2a2d55;color:#f3eee4}
 .cinema:fullscreen .chatForm input{background:#0b0d1f;color:#fff;border-color:#2a2d55}
-@media(max-width:900px){.cinema.on{grid-template-columns:1fr}.cinema.on .chatPanel{height:320px}.cinema.on .vremote,.cinema.on .stage.sharing .vremote{width:84px;height:84px;top:10px;right:10px}.cinema.on .vlocal{top:102px;right:20px;width:64px;height:64px}.cinema.on:fullscreen{grid-template-columns:1fr;grid-template-rows:1fr 240px}}
+@media(max-width:900px){.cinema.on{grid-template-columns:1fr}.cinema.on .chatPanel{height:auto;max-height:none}.cinema.on .chatList{max-height:220px}.faces video{width:96px;height:96px}.faces .vlocal{width:72px;height:72px}.cinema.on:fullscreen{grid-template-columns:1fr;grid-template-rows:1fr auto}}
 /* Livre */
 .book{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:16px;padding-bottom:8px}
 .page{flex:0 0 100%;scroll-snap-align:start;background:var(--card);border:1px solid var(--line);border-radius:6px 18px 18px 6px;box-shadow:inset 14px 0 18px -14px #0003,0 4px 18px #0001;padding:clamp(22px,5vw,52px);min-height:420px}

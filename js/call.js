@@ -1,4 +1,4 @@
-import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=11';
+import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=12';
 
 /* =========================================================
    Appel vidéo (WebRTC pair-à-pair, signalisation par Supabase Realtime)
@@ -171,7 +171,7 @@ async function switchMic(id) {
 function resume() {
   let blocked = false;
   if (meterCtx && meterCtx.state !== 'running') meterCtx.resume().catch(() => { }).then(() => { if (meterCtx.state !== 'running') $('unmuteBtn').hidden = false; });
-  const tries = [[aR, true], [vR, false], [vS, !screen]];
+  const tries = [[aR, true], [vR, false], [vL, false], [vS, !screen]];
   return Promise.all(tries.map(([el]) => el.srcObject && el.paused ? el.play().catch(() => { blocked = true; }) : null)).then(() => { $('unmuteBtn').hidden = !blocked; });
 }
 setInterval(() => { if (inCall) resume(); }, 2000);
