@@ -1,7 +1,7 @@
 import { sb, st, $, esc, fmt, uid, toast, floatEmo, nameOf, partnerName, q, oops, signedUrls, cachedUrl, uploadPhoto,
-  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js';
-import { initGames } from './games.js';
-import { initCall } from './call.js';
+  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=5';
+import { initGames } from './games.js?v=5';
+import { initCall } from './call.js?v=5';
 
 /* =========================================================
    Connexion
@@ -122,7 +122,8 @@ function subscribe() {
 let liveRetries = 0;
 function subscribeLive() {
   const cid = st.couple.id;
-  const ch = sb.channel('couple:' + cid, { config: { private: true, broadcast: { self: false }, presence: { key: st.me } } });
+  // Canal public au nom impossible à deviner (identifiant secret du couple, visible seulement par vous deux)
+  const ch = sb.channel('nd-' + cid, { config: { broadcast: { self: false }, presence: { key: st.me } } });
   st.chan = ch;
   ['sig', 'call-ring', 'call-join', 'call-end', 'screen', 'draw', 'react', 'ping', 'booth', 'pz-pick'].forEach(ev => ch.on('broadcast', { event: ev }, ({ payload }) => dispatch(ev, payload)));
   ch.on('presence', { event: 'sync' }, () => {
