@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1d3fa5">
+<title>Nous deux</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,500&family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stripe"></div>
+
+<!-- Connexion -->
+<div id="auth" class="gate" hidden>
+  <div class="card gatecard">
+    <h1>Nous deux</h1>
+    <p class="mute">Notre petit coin à nous, malgré les kilomètres.</p>
+    <form id="authForm">
+      <label>Email<input type="email" id="aEmail" autocomplete="email" required></label>
+      <label>Mot de passe<input type="password" id="aPass" autocomplete="current-password" minlength="6" required></label>
+      <div class="row"><button type="submit" id="aBtn">Se connecter</button><button type="button" class="ghost" id="aSwitch">Créer un compte</button></div>
+      <p class="mute" id="aMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Création / rejoindre le couple -->
+<div id="onboard" class="gate" hidden>
+  <div class="card gatecard">
+    <h1>Bienvenue ♥</h1>
+    <label>Ton prénom<input id="oName" maxlength="40" placeholder="DIOPA"></label>
+    <div class="row"><button id="oCreate">Créer notre espace</button></div>
+    <p class="mute" style="margin-top:18px">Ton chéri a déjà créé l'espace ? Entre son code :</p>
+    <div class="row"><input id="oCode" maxlength="6" placeholder="AB12CD" style="text-transform:uppercase"><button class="ghost" id="oJoin">Rejoindre</button></div>
+    <p class="mute" id="oMsg"></p>
+    <div class="row"><button class="x" id="oLogout">Se déconnecter</button></div>
+  </div>
+</div>
+
+<!-- Application -->
+<div id="app" hidden>
+<header>
+  <div class="top"><h1 id="appTitle">Nous deux</h1><span class="online" id="online">Hors ligne</span></div>
+  <nav id="nav">
+    <a href="#nous">Nous</a><a href="#appel">Appel</a><a href="#livre">Notre livre</a><a href="#mots">Mots doux</a><a href="#souvenirs">Souvenirs</a><a href="#jeux">Jeux</a><a href="#cine">Ciné</a><a href="#dates">Dates</a><a href="#style">Réglages</a>
+  </nav>
+</header>
+<div id="ring" class="ring" hidden><span id="ringText">📞 Appel entrant</span><button id="ringJoin">Décrocher</button><button class="ghost" id="ringNo">Plus tard</button></div>
+<main>
+
+<section data-v="nous">
+  <div class="cover" id="cover" hidden><img id="coverImg" alt="Photo de couverture"><p id="coverText"></p></div>
+  <div class="card">
+    <div class="fig"><svg id="arc" aria-label="Trajet jusqu'aux retrouvailles"></svg></div>
+    <div class="count" id="count"></div>
+    <p class="mute center" id="countNote"></p>
+  </div>
+  <div class="grid">
+    <div class="card"><h2>Mot du jour</h2><p class="hand" id="lastNote">Pas encore de mot doux.</p><p class="mute" id="lastNoteBy"></p></div>
+    <div class="card"><h2>Un signe</h2><p class="mute" id="pingInfo">Envoie un petit signe à l'autre.</p>
+      <div class="row"><button id="pingBtn">Je pense à toi ♥</button><a class="btn ghost" href="#appel">Appel vidéo</a></div></div>
+  </div>
+</section>
+
+<section data-v="appel">
+  <div class="stage" id="stage">
+    <video id="vScreen" class="vscreen" playsinline autoplay hidden></video>
+    <video id="vRemote" class="vremote" playsinline autoplay></video>
+    <video id="vLocal" class="vlocal" playsinline autoplay muted></video>
+    <div class="stageMsg" id="stageMsg">Lance un appel : ton chéri reçoit une sonnerie dans l'app.</div>
+    <div class="boothCount" id="boothCount" hidden></div>
+    <div class="flash" id="flash"></div>
+  </div>
+  <div class="row center">
+    <button id="callBtn">📞 Appeler</button>
+    <button class="ghost" id="micBtn" disabled>🎙️ Micro</button>
+    <button class="ghost" id="camBtn" disabled>📷 Caméra</button>
+    <button class="ghost" id="shareBtn" disabled>🖥️ Partager l'écran</button>
+    <button class="ghost" id="boothBtn">📸 Photobooth</button>
+    <button class="ghost" id="fullBtn">⛶ Plein écran</button>
+  </div>
+  <p class="mute center" id="callInfo"></p>
+  <div class="card" id="boothPanel" hidden>
+    <h2>Photobooth</h2>
+    <div class="row"><label style="flex:1 1 160px">Filtre<select id="boothFilter"><option value="none">Naturel</option><option value="grayscale(1) contrast(1.1)">Noir & blanc</option><option value="sepia(.75) contrast(1.05)">Sépia</option><option value="contrast(1.15) saturate(1.45)">Vif</option><option value="saturate(.8) hue-rotate(-10deg) brightness(1.05) contrast(.95)">Vintage</option></select></label>
+      <label style="flex:1 1 160px">Légende<input id="boothText" maxlength="40" placeholder="Nous deux ♥"></label></div>
+    <div class="row"><button id="boothGo">Lancer (4 photos)</button></div>
+    <div id="boothResult" hidden><canvas id="strip" class="strip"></canvas>
+      <div class="row center"><button id="boothSave">Garder dans les souvenirs</button><a class="btn ghost" id="boothDl" download="nous-deux-photobooth.jpg">Télécharger</a></div></div>
+  </div>
+</section>
+
+<section data-v="livre">
+  <div class="card">
+    <div class="top"><h2 id="bookTitle" style="margin:0">Le livre de notre histoire</h2>
+      <div class="row" style="margin:0"><button class="ghost" id="bkRead">Lire</button><button class="ghost" id="bkToc">Sommaire</button><button id="bkNew">Nouveau chapitre</button></div></div>
+  </div>
+  <div id="bkTocView" class="card"><ul class="list toc" id="toc"></ul></div>
+  <div id="bkReadView" hidden>
+    <div class="book" id="book"></div>
+    <div class="row center"><button class="ghost" id="bkPrev">← Précédente</button><span class="mute" id="bkPos"></span><button class="ghost" id="bkNext">Suivante →</button></div>
+  </div>
+  <div id="bkEdit" class="card" hidden>
+    <h2 id="bkEditTitle">Nouveau chapitre</h2>
+    <div class="grid">
+      <label>Titre du chapitre<input id="cTitle" maxlength="200" placeholder="Le jour où on s'est rencontrés"></label>
+      <label>Quand ?<input id="cWhen" maxlength="80" placeholder="Mars 2025, Cotonou"></label>
+    </div>
+    <label style="margin-top:10px">Le récit<textarea id="cBody" class="reading" maxlength="50000" placeholder="Raconte… Laisse une ligne vide pour changer de paragraphe."></textarea></label>
+    <div class="row"><label style="flex:1 1 220px">Photo du chapitre (facultatif)<input type="file" id="cPhoto" accept="image/*"></label>
+      <label style="flex:0 1 140px">Position<input type="number" id="cOrder" min="1" step="1"></label></div>
+    <div class="row"><button id="cSave">Enregistrer</button><button class="ghost" id="cCancel">Annuler</button><button class="x" id="cDel" hidden>Supprimer ce chapitre</button><span class="mute" id="cMsg"></span></div>
+  </div>
+</section>
+
+<section data-v="mots">
+  <div class="card">
+    <h2>Écrire un mot doux</h2>
+    <textarea id="noteText" maxlength="2000" placeholder="Ce que j'ai envie de te dire aujourd'hui…"></textarea>
+    <div class="row"><button id="noteBtn">Envoyer</button></div>
+  </div>
+  <div class="card"><ul class="list" id="notes"></ul></div>
+</section>
+
+<section data-v="souvenirs">
+  <div class="card">
+    <h2>Ajouter un souvenir</h2>
+    <div class="row"><input type="file" id="photo" accept="image/*" multiple><input id="caption" maxlength="200" placeholder="Légende (ex. notre premier date)"></div>
+    <div class="row"><button id="photoBtn">Ajouter</button><span class="mute" id="photoMsg"></span></div>
+  </div>
+  <div class="photos" id="photos"></div>
+</section>
+
+<section data-v="jeux">
+  <div class="card">
+    <h2>Puzzle photo</h2>
+    <p class="mute">Une de vos photos, découpée et mélangée. Touchez deux pièces pour les échanger : vous jouez sur le même puzzle, en même temps.</p>
+    <div class="row"><select id="pzPhoto"></select><select id="pzSize" style="flex:0 1 120px"><option value="3">3 × 3</option><option value="4" selected>4 × 4</option><option value="5">5 × 5</option><option value="6">6 × 6</option></select><button id="pzNew">Nouveau puzzle</button></div>
+    <p class="mute center" id="pzInfo"></p>
+    <div class="puzzle" id="puzzle"></div>
+  </div>
+  <div class="card">
+    <h2>Dessin à deux</h2>
+    <p class="mute">Dessinez en même temps sur la même feuille. « Devine mon dessin » : l'un tire un mot secret, l'autre devine.</p>
+    <div class="row" id="swatches"></div>
+    <div class="canvasWrap"><canvas id="cv"></canvas></div>
+    <div class="row"><button class="ghost" id="dvDraw">Je dessine (mot secret)</button><button class="ghost" id="cvClear">Effacer la feuille</button><span class="mute" id="dvInfo"></span></div>
+    <div class="word" id="dvWord"></div>
+    <div class="row" id="dvGuessRow" hidden><input id="dvGuess" placeholder="Ta réponse…" maxlength="40"><button id="dvGuessBtn">Deviner</button></div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h2>Tu me connais ?</h2>
+      <p class="mute">Pose une question sur toi avec ta réponse. L'autre devine, puis découvre la vérité.</p>
+      <input id="qzQ" maxlength="300" placeholder="Mon plat préféré quand j'étais petit·e ?">
+      <input id="qzA" maxlength="200" placeholder="La bonne réponse (cachée)">
+      <div class="row"><button id="qzBtn">Poser la question</button></div>
+      <ul class="list" id="quiz"></ul>
+    </div>
+    <div class="card">
+      <h2>Action ou vérité</h2>
+      <div class="deck" id="aov"><span class="mute">Tirez une carte.</span></div>
+      <div class="row center"><button id="aovA">Action</button><button class="ghost" id="aovV">Vérité</button></div>
+    </div>
+    <div class="card">
+      <h2>Morpion</h2>
+      <p class="mute" id="mStatus"></p>
+      <div class="board" id="board"></div>
+      <div class="row center"><button class="ghost" id="mReset">Nouvelle partie</button></div>
+    </div>
+    <div class="card">
+      <h2>Question du jour</h2>
+      <p class="hand" id="qText"></p>
+      <textarea id="qAns" maxlength="400" placeholder="Ta réponse…"></textarea>
+      <div class="row"><button id="qBtn">Répondre</button><button class="ghost" id="qNext">Autre question</button></div>
+      <ul class="list" id="qAnswers"></ul>
+    </div>
+    <div class="card">
+      <h2>Tu préfères…</h2>
+      <div class="row"><button class="ghost grow" id="tpA"></button><button class="ghost grow" id="tpB"></button></div>
+      <p class="mute" id="tpRes"></p>
+      <div class="row"><button class="ghost" id="tpNext">Suivant</button></div>
+    </div>
+  </div>
+</section>
+
+<section data-v="cine">
+  <div class="card">
+    <h2>Regarder ensemble</h2>
+    <p class="mute"><b>Option 1 :</b> dans l'onglet Appel, l'un partage son écran (avec le son) depuis un ordinateur. <b>Option 2 :</b> chacun lance le film sur son appli, et l'horloge commune vous garde au même moment.</p>
+    <div class="big" id="cineBig">—</div>
+    <div class="tc" id="cineTc">00:00:00</div>
+    <p class="mute center" id="cineInfo"></p>
+    <div class="row center"><input id="cineFilm" maxlength="100" placeholder="Titre du film" style="flex:0 1 260px"><button id="cinePlay">▶ Lecture (décompte 5 s)</button><button class="ghost" id="cinePause">⏸ Pause</button></div>
+    <div class="row center"><input id="cineAt" placeholder="Recaler à 00:42:10" style="flex:0 1 200px"><button class="ghost" id="cineSeek">Recaler</button></div>
+    <div class="reacts" id="reacts"></div>
+  </div>
+  <div class="card">
+    <h2>Notre liste de films</h2>
+    <div class="row"><input id="wTitle" maxlength="200" placeholder="Ajouter un film"><button id="wBtn">Ajouter</button></div>
+    <ul class="list" id="watch"></ul>
+  </div>
+</section>
+
+<section data-v="dates">
+  <div class="card">
+    <h2>Planifier un date à distance</h2>
+    <div class="row"><select id="dIdea"></select></div>
+    <div class="row"><input id="dTitle" maxlength="200" placeholder="Ou ton idée à toi"><input type="datetime-local" id="dWhen" style="flex:0 1 230px"></div>
+    <div class="row"><button id="dBtn">Planifier</button></div>
+  </div>
+  <div class="card"><ul class="list" id="dates"></ul></div>
+</section>
+
+<section data-v="style">
+  <div class="card"><h2>Couleurs</h2><div class="pals" id="pals"></div></div>
+  <div class="card"><h2>Écriture des titres</h2><div class="fonts" id="fonts"></div></div>
+  <div class="card">
+    <h2>Nous</h2>
+    <div class="grid">
+      <label>Mon prénom<input id="tName" maxlength="40"></label>
+      <label>Titre de l'app<input id="tTitle" maxlength="50" placeholder="Nous deux"></label>
+      <label>Titre du livre<input id="tBook" maxlength="80" placeholder="Le livre de notre histoire"></label>
+      <label>Phrase sur la photo<input id="tCover" maxlength="80" placeholder="Depuis le premier jour"></label>
+      <label>Date des retrouvailles<input type="datetime-local" id="sReunion"></label>
+      <label>Loin l'un de l'autre depuis<input type="date" id="sSince"></label>
+      <label>Ma ville<input id="sA" maxlength="40" placeholder="Cotonou"></label>
+      <label>Sa ville<input id="sB" maxlength="40" placeholder="Paris"></label>
+      <label>Photo de couverture<input type="file" id="tPhoto" accept="image/*"></label>
+    </div>
+    <div class="row"><button id="saveSettings">Enregistrer</button><button class="ghost" id="rmCover">Retirer la photo</button><span class="mute" id="sMsg"></span></div>
+  </div>
+  <div class="card">
+    <h2>Appels vidéo</h2>
+    <p class="mute">Si l'appel ne se connecte pas (certains réseaux mobiles bloquent les appels directs), ajoutez un serveur relais TURN, par exemple un compte gratuit sur metered.ca.</p>
+    <div class="grid">
+      <label>Adresse TURN<input id="turnUrl" placeholder="turn:global.relay.metered.ca:443"></label>
+      <label>Utilisateur<input id="turnUser" autocomplete="off"></label>
+      <label>Mot de passe<input id="turnPass" type="password" autocomplete="off"></label>
+    </div>
+    <div class="row"><button class="ghost" id="saveTurn">Enregistrer le relais</button></div>
+  </div>
+  <div class="card">
+    <h2>Notre espace</h2>
+    <p>Code d'invitation : <b id="coupleCode" class="code"></b> <span class="mute" id="coupleMembers"></span></p>
+    <div class="row"><button class="ghost" id="logout">Se déconnecter</button></div>
+  </div>
+</section>
+</main>
+</div>
+<p id="status" class="status" hidden></p>
+<div id="toast"></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
