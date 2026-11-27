@@ -1,11 +1,12 @@
 import { sb, st, $, esc, fmt, uid, toast, floatEmo, nameOf, partnerName, q, oops, signedUrls, cachedUrl, uploadPhoto,
-  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=18';
-import { initGames } from './games.js?v=18';
-import { initGames2 } from './games2.js?v=18';
-import { initCall } from './call.js?v=18';
-import { initJigsaw } from './jigsaw.js?v=18';
-import { initBooth } from './booth.js?v=18';
-import { initCinema } from './cinema.js?v=18';
+  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=19';
+import { initGames } from './games.js?v=19';
+import { initGames2 } from './games2.js?v=19';
+import { initCall } from './call.js?v=19';
+import { initDessin } from './dessin.js?v=19';
+import { initJigsaw } from './jigsaw.js?v=19';
+import { initBooth } from './booth.js?v=19';
+import { initCinema } from './cinema.js?v=19';
 
 /* =========================================================
    Connexion
@@ -411,5 +412,6 @@ initCall();
 initCinema();
 initBooth();
 initJigsaw();
+initDessin();
 route();
 boot();

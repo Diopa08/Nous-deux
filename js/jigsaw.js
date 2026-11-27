@@ -1,4 +1,4 @@
-import { st, $, esc, toast, floatEmo, nameOf, partner, partnerName, onGame, saveGame, signedUrls, onTable, listen, send } from './core.js?v=18';
+import { st, $, esc, toast, floatEmo, nameOf, partner, partnerName, onGame, saveGame, signedUrls, onTable, listen, send } from './core.js?v=19';
 
 /* =========================================================
    Vrai puzzle : pièces à encoches, glisser-déposer, mode

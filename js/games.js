@@ -1,4 +1,4 @@
-import { sb, st, $, esc, norm, uid, toast, floatEmo, nameOf, partnerName, q, signedUrls, cachedUrl, listen, send, onGame, saveGame, onTable, loadTable } from './core.js?v=18';
+import { sb, st, $, esc, norm, uid, toast, floatEmo, nameOf, partnerName, q, signedUrls, cachedUrl, listen, send, onGame, saveGame, onTable, loadTable } from './core.js?v=19';
 
 const QUESTIONS = ["Quel moment avec moi revivrais-tu encore et encore ?", "Qu'est-ce qui te manque le plus chez moi cette semaine ?", "Où est-ce qu'on vivra dans 5 ans ?", "Quelle petite habitude à moi te fait sourire ?", "Quel serait notre voyage de rêve ?", "Quelle chanson te fait penser à nous ?", "Que veux-tu qu'on fasse en premier quand on se revoit ?", "Ton souvenir préféré de notre premier rendez-vous ?", "Qu'est-ce que je fais qui te fait te sentir aimé·e ?", "Un rêve que tu n'as jamais dit à personne ?", "Une journée entière sans contrainte : on fait quoi ?", "Qu'as-tu appris sur toi depuis qu'on est ensemble ?"];
 const TP = [["Un appel vidéo de 3 h", "10 vocaux surprises dans la journée"], ["Un week-end à la plage", "Un week-end à la montagne"], ["Cuisiner ensemble", "Aller au resto"], ["Une lettre écrite à la main", "Une playlist faite pour toi"], ["Un film d'horreur", "Une comédie romantique"], ["Le lever du soleil", "Les étoiles tard le soir"], ["Un voyage surprise", "Un voyage planifié ensemble"], ["Danser toute la nuit", "Une soirée canapé"]];
@@ -9,63 +9,6 @@ const g = k => st.games[k] || null;
 const clone = o => JSON.parse(JSON.stringify(o || {}));
 
 export function initGames() {
-  /* ---------------- Dessin à deux ---------------- */
-  const COLS = ['#1b1b1b', '#d32f45', '#1d3fa5', '#0d8f80', '#f0a020', '#8e3b5f', '#ffffff'];
-  let col = COLS[1], strokes = [], live = {}, cur = null, lastEmit = 0;
-  $('swatches').innerHTML = COLS.map((c, i) => `<button class="sw${c === col ? ' sel' : ''}" data-col="${c}" style="background:${c};${c === '#ffffff' ? 'box-shadow:inset 0 0 0 1px #0003' : ''}" aria-label="${i === 6 ? 'Gomme' : 'Couleur ' + (i + 1)}"></button>`).join('');
-  $('swatches').onclick = e => { const b = e.target.closest('[data-col]'); if (!b) return; col = b.dataset.col; document.querySelectorAll('.sw').forEach(s => s.classList.toggle('sel', s === b)); };
-  const cv = $('cv'), ctx = cv.getContext('2d');
-  function size() { const r = cv.getBoundingClientRect(); if (!r.width) return; const d = devicePixelRatio || 1; cv.width = r.width * d; cv.height = r.height * d; redraw(); }
-  new ResizeObserver(size).observe(cv);
-  function line(s) {
-    const p = s.p; if (!Array.isArray(p) || p.length < 2) return; const W = cv.width, H = cv.height;
-    ctx.strokeStyle = /^#[0-9a-f]{6}$/i.test(s.c) ? s.c : '#000'; ctx.lineWidth = (s.c === '#ffffff' ? 22 : 5) * (W / 700); ctx.lineCap = ctx.lineJoin = 'round';
-    ctx.beginPath(); ctx.moveTo(p[0] / 1000 * W, p[1] / 1000 * H); for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i] / 1000 * W, p[i + 1] / 1000 * H);
-    if (p.length === 2) ctx.lineTo(p[0] / 1000 * W + .1, p[1] / 1000 * H); ctx.stroke();
-  }
-  function redraw() { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); strokes.forEach(line); Object.values(live).forEach(line); if (cur) line(cur); }
-  const pt = e => { const r = cv.getBoundingClientRect(); return [Math.round((e.clientX - r.left) / r.width * 1000), Math.round((e.clientY - r.top) / r.height * 1000)]; };
-  async function commit() {
-    if (!cur || cur.p.length < 2) { cur = null; return; }
-    const s = cur; cur = null; strokes.push(s);
-    send('draw', { id: s.id, c: s.c, n: s.p.length, p: s.p.slice(-300) });
-    const { error } = await sb.from('strokes').insert({ id: s.id, couple_id: st.couple.id, color: s.c, points: s.p });
-    if (error) toast('Trait non enregistré');
-  }
-  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); cur = { id: uid(), c: col, p: pt(e) }; redraw(); });
-  cv.addEventListener('pointermove', e => {
-    if (!cur) return; cur.p.push(...pt(e));
-    if (cur.p.length > 1200) { const end = cur.p.slice(-2); commit(); cur = { id: uid(), c: col, p: end }; }
-    redraw(); const n = Date.now(); if (n - lastEmit > 70) { lastEmit = n; send('draw', { id: cur.id, c: cur.c, n: cur.p.length, p: cur.p.slice(-300) }); }
-  });
-  ['pointerup', 'pointercancel'].forEach(t => cv.addEventListener(t, commit));
-  listen('draw', d => {
-    if (typeof d.id !== 'string') return;
-    const p = Array.isArray(d.p) ? d.p.filter(n => typeof n === 'number').slice(0, 600) : [];
-    const n = +d.n || p.length, start = n - p.length, prev = live[d.id];
-    live[d.id] = { c: String(d.c || ''), p: prev && prev.p.length >= start ? prev.p.slice(0, start).concat(p) : p };
-    redraw();
-  });
-  onTable('strokes', rows => { strokes = rows.map(r => ({ id: r.id, c: r.color, p: r.points })); rows.forEach(r => delete live[r.id]); redraw(); });
-  $('cvClear').onclick = async () => { strokes = []; live = {}; redraw(); await q(sb.from('strokes').delete().eq('couple_id', st.couple.id)); loadTable('strokes'); };
-
-  /* Devine mon dessin */
-  function renderDv() {
-    const dv = g('devine'), w = $('dvWord'), info = $('dvInfo'), gr = $('dvGuessRow');
-    if (!dv || !dv.word) { w.textContent = ''; info.textContent = ''; gr.hidden = true; return; }
-    if (dv.solved) { w.textContent = '🎉 « ' + dv.word + ' »'; info.textContent = nameOf(dv.solvedBy) + ' a trouvé !'; gr.hidden = true; return; }
-    if (dv.drawer === st.me) { w.textContent = 'Dessine : ' + dv.word; info.textContent = 'Ne le dis pas !'; gr.hidden = true; }
-    else { w.textContent = '?'; info.textContent = nameOf(dv.drawer) + ' dessine… devine !'; gr.hidden = false; }
-  }
-  let wasSolved = false;
-  onGame('devine', dv => { renderDv(); if (dv?.solved && !wasSolved) floatEmo('🎉'); wasSolved = !!dv?.solved; });
-  $('dvDraw').onclick = async () => { await saveGame('devine', { drawer: st.me, word: WORDS[Math.floor(Math.random() * WORDS.length)], solved: false, at: Date.now() }); $('cvClear').click(); };
-  $('dvGuessBtn').onclick = () => {
-    const dv = g('devine'); if (!dv) return;
-    if (norm($('dvGuess').value) === norm(dv.word)) { saveGame('devine', { ...dv, solved: true, solvedBy: st.me }); $('dvGuess').value = ''; }
-    else toast('Non… essaie encore !');
-  };
-
   /* ---------------- Tu me connais ? ---------------- */
   onTable('quiz', rows => {
     $('quiz').innerHTML = rows.length ? rows.map(x => {

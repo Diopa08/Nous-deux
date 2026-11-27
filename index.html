@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,500&family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=18">
+<link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 <div class="stripe"></div>
@@ -243,12 +243,42 @@
   </div>
 
   <div class="card game" data-g="dessin" hidden>
-    <p class="mute">Dessinez en même temps sur la même feuille. « Devine mon dessin » : l'un tire un mot secret, l'autre devine.</p>
-    <div class="row" id="swatches"></div>
+    <div class="dtabs" id="dTabs"><button data-dm="libre">✏️ Libre</button><button data-dm="pictio">🎯 Devinettes</button><button data-dm="repro">🖼️ Reproduire</button></div>
+
+    <div class="dpanel" data-p="libre">
+      <div class="row"><label class="inl">Fond <input type="color" id="dBg" value="#ffffff"></label><select id="dPhoto" style="flex:1 1 220px"></select><button class="ghost" id="dNoPhoto">Sans photo</button></div>
+    </div>
+
+    <div class="dpanel" data-p="pictio" hidden>
+      <div class="pictioTop"><div><div class="pictioWord" id="pWord">—</div><div class="mute" id="pInfo"></div></div><div class="pictioTime" id="pTime"></div></div>
+      <div class="row" id="pGuessRow" hidden><input id="pGuess" maxlength="40" placeholder="Ta proposition…" autocomplete="off"><button id="pGuessBtn">Proposer</button></div>
+      <div class="pictioGuesses" id="pGuesses"></div>
+      <div class="row"><span id="pScores" class="pscore"></span><span style="margin-left:auto"></span><button class="ghost" id="pNext">Manche suivante</button><button class="ghost" id="pNew">Nouvelle partie</button></div>
+    </div>
+
+    <div class="dpanel" data-p="repro" hidden>
+      <div class="reproTop">
+        <canvas id="rModel" class="rmodel" width="300" height="225" aria-label="Modèle à reproduire"></canvas>
+        <div style="flex:1;min-width:0">
+          <div class="row" style="margin-top:0"><select id="rTpl" style="flex:1 1 160px"></select><select id="rMode" style="flex:1 1 160px"><option value="defi">Défi : reproduire à main levée</option><option value="calque">Calque : repasser sur le modèle</option></select></div>
+          <div class="row"><button id="rCheck">✅ Valider mon dessin</button><button class="ghost" id="rRand">🎲 Modèle au hasard</button></div>
+          <div class="mute" id="rRes"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dtools">
+      <div class="dcols" id="dCols"></div>
+      <label class="inl">Taille <input type="range" id="dSize" min="2" max="60" value="6"></label>
+      <div class="dtoolbtns" id="dTools">
+        <button data-t="pen" class="sel" title="Pinceau">✏️</button><button data-t="erase" title="Gomme">🧽</button><button data-t="line" title="Ligne">／</button><button data-t="rect" title="Rectangle">▭</button><button data-t="circle" title="Cercle">◯</button><button data-t="fill" title="Remplir">🪣</button>
+        <button id="dUndo" title="Annuler mon dernier trait">↶</button><button id="dClear" title="Effacer la feuille">🗑️</button><button id="dSave" title="Enregistrer dans la galerie">💾</button>
+      </div>
+    </div>
     <div class="canvasWrap"><canvas id="cv"></canvas></div>
-    <div class="row"><button class="ghost" id="dvDraw">Je dessine (mot secret)</button><button class="ghost" id="cvClear">Effacer la feuille</button><span class="mute" id="dvInfo"></span></div>
-    <div class="word" id="dvWord"></div>
-    <div class="row" id="dvGuessRow" hidden><input id="dvGuess" placeholder="Ta réponse…" maxlength="40"><button id="dvGuessBtn">Deviner</button></div>
+    <p class="mute center" id="dMsg"></p>
+    <h3 class="nvh" style="text-align:left;margin-top:14px">Notre galerie</h3>
+    <div class="dgallery" id="dGallery"></div>
   </div>
 
   <div class="card game" data-g="p4" hidden>
@@ -400,6 +430,6 @@
 </div>
 <p id="status" class="status" hidden></p>
 <div id="toast"></div>
-<script type="module" src="js/app.js?v=18"></script>
+<script type="module" src="js/app.js?v=19"></script>
 </body>
 </html>

@@ -205,6 +205,34 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .gtile span{font-size:13px;color:var(--mute);font-weight:400}
 .gtile .live{font-size:12px;color:var(--a);font-weight:700}
 .gamebar{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+/* Dessin */
+.dtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:12px}
+.dtabs button{background:transparent;color:var(--mute);border-radius:999px;min-height:40px;padding:6px 8px;font-weight:600}
+.dtabs button.sel{background:var(--b);color:var(--bg)}
+.inl{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
+.inl input[type=color]{width:44px;height:36px;padding:2px;margin:0}
+.inl input[type=range]{width:140px;padding:0;margin:0;border:0;background:none;accent-color:var(--a)}
+.dtools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0 8px}
+.dcols{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.dcols button{width:30px;height:30px;min-height:30px;padding:0;border-radius:50%;border:3px solid transparent;box-shadow:inset 0 0 0 1px #0002}
+.dcols button.sel{border-color:var(--ink)}
+.dcols input{width:36px;height:34px;padding:2px;margin:0}
+.dtoolbtns{display:flex;gap:4px;flex-wrap:wrap}
+.dtoolbtns button{width:42px;min-height:42px;padding:0;background:var(--bg);color:var(--ink);border:1px solid var(--line);font-size:18px;border-radius:10px}
+.dtoolbtns button.sel{background:var(--b);color:var(--bg);border-color:var(--b)}
+.dgallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.dgallery figure{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:6px;font-size:12px;color:var(--mute)}
+.dgallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;display:block;background:#fff}
+.dgallery a{color:var(--b)}
+.dgallery p{grid-column:1/-1}
+.pictioTop{display:flex;align-items:center;gap:14px;justify-content:space-between}
+.pictioWord{font:700 clamp(24px,6vw,36px)/1.15 "DM Sans";letter-spacing:.18em;color:var(--b);overflow-wrap:anywhere}
+.pictioTime{font:700 34px/1 "DM Sans";color:var(--a);font-variant-numeric:tabular-nums;flex:none}
+.pictioGuesses{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pictioGuesses span{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px}
+.pscore{font-weight:700}
+.reproTop{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.rmodel{width:180px;height:auto;aspect-ratio:4/3;background:#fff;border:2px solid var(--line);border-radius:12px;flex:none}
 /* Puzzle */
 #jigSetup .boothOpts{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
 .jRecords{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:14px}

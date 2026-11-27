@@ -1,4 +1,4 @@
-import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=18';
+import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=19';
 
 /* =========================================================
    Appel vidéo (WebRTC pair-à-pair, signalisation par Supabase Realtime)

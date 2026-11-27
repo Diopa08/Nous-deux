@@ -1,5 +1,5 @@
-import { sb, st, $, esc, toast, floatEmo, listen, send, uploadPhoto, loadTable, q } from './core.js?v=18';
-import { boothCam, boothRelease, callActive } from './call.js?v=18';
+import { sb, st, $, esc, toast, floatEmo, listen, send, uploadPhoto, loadTable, q } from './core.js?v=19';
+import { boothCam, boothRelease, callActive } from './call.js?v=19';
 
 /* =========================================================
    Photobooth : prises synchronisées, mises en page, cadres,
