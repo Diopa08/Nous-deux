@@ -1,4 +1,4 @@
-import { sb, st, $, esc, fmt, toast, floatEmo, nameOf, partnerName, q, listen, send, onTable, loadTable } from './core.js?v=14';
+import { sb, st, $, esc, fmt, toast, floatEmo, nameOf, partnerName, q, listen, send, onTable, loadTable } from './core.js?v=15';
 
 /* =========================================================
    Mode ciné : film en grand, visages en bulles, chat et réactions
@@ -8,7 +8,7 @@ let seen = new Set(), first = true;
 
 function setCine(on) {
   const vR = $('vRemote'), vL = $('vLocal'), vS = $('vScreen');
-  if (on) $('faces').append(vR, vL); else vS.after(vR, vL);
+  if (vR.parentElement !== $('miniVids')) { if (on) $('faces').append(vR, vL); else vS.after(vR, vL); }
   [vR, vL].forEach(v => v.srcObject && v.play().catch(() => { }));
   $('cinema').classList.toggle('on', on);
   $('cineBtn').classList.toggle('sel', on);

@@ -1,4 +1,4 @@
-import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=14';
+import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=15';
 
 /* =========================================================
    Appel vidéo (WebRTC pair-à-pair, signalisation par Supabase Realtime)
@@ -189,7 +189,7 @@ function showRing(on) { ringing = on; $('ring').hidden = !on; $('ringText').text
 async function startCall() {
   try { await getCam(); } catch (e) { return; }
   if (!st.live) { toast('Connexion temps réel pas encore prête, réessaie dans quelques secondes.'); local?.getTracks().forEach(t => t.stop()); local = null; vL.srcObject = null; buttons(); return; }
-  inCall = true; info('');
+  inCall = true; info(''); placeVideos();
   stageMsg(here ? 'Ça sonne chez ' + partnerName() + '…' : partnerName() + ' n\'a pas l\'app ouverte : la sonnerie arrivera dès qu\'il l\'ouvre.');
   send('call-ring', {}); buttons();
   clearTimeout(startCall.t); startCall.t = setTimeout(() => { if (inCall && !pc) { stageMsg(partnerName() + ' ne répond pas. Réessaie plus tard ♥'); } }, 45000);
@@ -197,7 +197,7 @@ async function startCall() {
 async function answer() {
   showRing(false);
   try { await getCam(); } catch (e) { return; }
-  inCall = true; location.hash = 'appel'; stageMsg('Connexion…');
+  inCall = true; location.hash = 'appel'; stageMsg('Connexion…'); placeVideos();
   makePC(); send('call-join', {}); buttons();
 }
 function hangup(notify = true) {
@@ -207,7 +207,7 @@ function hangup(notify = true) {
   pc = null; inCall = false; remoteStreams.clear(); remoteCamId = null; remoteScreenId = null;
   vR.srcObject = null; aR.srcObject = null; vS.srcObject = null; $('unmuteBtn').hidden = true; vS.hidden = true; stage.classList.remove('sharing');
   if (!boothBusy) { local?.getTracks().forEach(t => t.stop()); local = null; vL.srcObject = null; }
-  stageMsg('Lance un appel : ' + partnerName() + ' reçoit une sonnerie dans l\'app.'); info(''); buttons();
+  stageMsg('Lance un appel : ' + partnerName() + ' reçoit une sonnerie dans l\'app.'); info(''); buttons(); placeVideos();
 }
 
 /* --- Partage d'écran --- */
@@ -293,7 +293,21 @@ async function runBooth({ at, filter, text }) {
   $('boothResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+/* --- Mini-appel flottant quand on quitte l'onglet Appel pendant un appel --- */
+let view = 'nous';
+function placeVideos() {
+  const mini = inCall && view !== 'appel';
+  $('mini').hidden = !mini;
+  if (mini) $('miniVids').append(vR, vL);
+  else if (vR.parentElement === $('miniVids')) { if ($('cinema').classList.contains('on')) $('faces').append(vR, vL); else vS.after(vR, vL); }
+  [vR, vL].forEach(v => v.srcObject && v.play().catch(() => { }));
+}
+
 export function initCall() {
+  listen('view', v => { view = v; placeVideos(); });
+  $('miniEnd').onclick = () => hangup();
+  $('miniMic').onclick = () => { $('micBtn').click(); const a = local?.getAudioTracks()[0]; $('miniMic').textContent = a && !a.enabled ? '🔇' : '🎙️'; };
+  $('miniMove').onclick = () => $('mini').classList.toggle('left');
   buttons(); stageMsg('Lance un appel : ton chéri reçoit une sonnerie dans l\'app.');
   $('callBtn').onclick = () => inCall ? hangup() : ringing ? answer() : startCall();
   $('ringJoin').onclick = answer;

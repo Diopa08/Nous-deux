@@ -1,4 +1,4 @@
-import { sb, st, $, esc, toast, floatEmo, nameOf, partner, partnerName, onGame, saveGame, signedUrls, listen } from './core.js?v=14';
+import { sb, st, $, esc, toast, floatEmo, nameOf, partner, partnerName, onGame, saveGame, signedUrls, listen } from './core.js?v=15';
 
 const g = k => st.games[k] || null;
 const clone = o => JSON.parse(JSON.stringify(o || {}));

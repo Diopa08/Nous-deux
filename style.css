@@ -92,6 +92,16 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .audioBar label{font-size:13px}.audioBar select{margin-top:4px}.audioBar input[type=range]{width:100%;accent-color:var(--a);margin-top:10px;padding:0;border:0;background:none}
 
 .unmute{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:7;font-size:18px;box-shadow:0 8px 30px #0008}
+/* Mini-appel flottant (pendant les jeux) */
+.mini{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;width:230px;background:#0b0d1a;border-radius:18px;overflow:hidden;box-shadow:0 14px 40px #0006;border:2px solid #fff3}
+.mini.left{right:auto;left:14px}
+.miniVids{position:relative;aspect-ratio:4/3}
+.miniVids video{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover;border-radius:0!important;border:0!important;box-shadow:none!important;transform:none}
+.miniVids .vlocal{inset:auto 8px 8px auto!important;width:30%!important;height:auto!important;aspect-ratio:3/4;border-radius:8px!important;border:2px solid #fff!important;transform:scaleX(-1)}
+.miniBar{display:flex;gap:4px;padding:6px;background:#0b0d1a}
+.miniBar>*{min-height:36px;padding:6px 8px;font-size:14px;flex:1}
+.miniBar .ghost{color:#fff;border-color:#fff4}
+@media(max-width:600px){.mini{width:156px}.miniBar>*:last-child,.miniBar .lbl{display:none}.miniBar>*{padding:4px}}
 /* Mode ciné */
 .chatPanel,.cineHint{display:none}
 .cinema.on{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;align-items:stretch;width:min(calc(100vw - 32px),1600px);margin-left:calc(50% - min(50vw - 16px,800px))}

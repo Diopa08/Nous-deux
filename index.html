@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,500&family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 <div class="stripe"></div>
@@ -130,6 +130,7 @@
     <button class="ghost" id="cineBtn">🍿 Mode ciné</button>
     <button class="ghost" id="boothBtn">📸 Photobooth</button>
     <button class="ghost" id="fullBtn">⛶ Plein écran</button>
+    <a class="btn ghost" href="#jeux" id="playBtn">🎮 Jouer pendant l'appel</a>
   </div>
   <div class="audioBar" id="audioBar">
     <label>🎙️ Mon micro<select id="micSel"><option value="">Micro par défaut</option></select></label>
@@ -350,8 +351,12 @@
 </section>
 </main>
 </div>
+<div class="mini" id="mini" hidden>
+  <div class="miniVids" id="miniVids"></div>
+  <div class="miniBar"><a href="#appel" class="btn" title="Revenir à l'appel">📞<span class="lbl"> Appel</span></a><button class="ghost" id="miniMic" title="Micro">🎙️</button><button class="danger" id="miniEnd" title="Raccrocher">✕</button><button class="ghost" id="miniMove" title="Déplacer">⇄</button></div>
+</div>
 <p id="status" class="status" hidden></p>
 <div id="toast"></div>
-<script type="module" src="js/app.js?v=14"></script>
+<script type="module" src="js/app.js?v=15"></script>
 </body>
 </html>
