@@ -94,8 +94,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .unmute{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:7;font-size:18px;box-shadow:0 8px 30px #0008}
 /* Mode ciné */
 .chatPanel,.cineHint{display:none}
-.cinema.on{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;align-items:stretch}
-.cinema.on .stage{aspect-ratio:16/9;max-height:none}
+.cinema.on{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;align-items:stretch;width:min(calc(100vw - 32px),1600px);margin-left:calc(50% - min(50vw - 16px,800px))}
+.cinema.on .stage{aspect-ratio:16/9;max-height:calc(100vh - 140px);min-height:280px}
+@media(min-width:901px){.cinema.on .chatPanel{height:0;min-height:100%}}
 .cinema.on .chatPanel{display:flex}
 .cinema.on .stage:not(.sharing) .cineHint{display:grid}
 .cinema.on .stageMsg{display:none}
@@ -122,9 +123,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .pop{background:#fffffff0;color:#13204d;padding:8px 14px;border-radius:14px;font-size:15px;box-shadow:0 6px 20px #0006;animation:popin .25s ease-out;overflow-wrap:anywhere}
 .pop b{color:#d32f45;margin-right:6px}
 @keyframes popin{from{transform:translateY(10px);opacity:0}}
-.cinema:fullscreen{background:#05060f;padding:12px;height:100vh;width:100vw}
+.cinema:fullscreen{background:#05060f;padding:12px;height:100vh;width:100vw!important;margin:0!important}
 .cinema.on:fullscreen{grid-template-columns:minmax(0,1fr) 340px}
-.cinema:fullscreen .stage{aspect-ratio:auto;height:100%;max-height:none;border-radius:12px}
+.cinema:fullscreen .stage{aspect-ratio:auto;height:100%;max-height:none;min-height:0;border-radius:12px}
 .cinema:fullscreen .chatPanel{background:#12142a;color:#f3eee4;border-color:#2a2d55}
 .cinema:fullscreen .chatList li:not(.me){background:#1d2048;border-color:#2a2d55;color:#f3eee4}
 .cinema:fullscreen .chatForm input{background:#0b0d1f;color:#fff;border-color:#2a2d55}
