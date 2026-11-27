@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1/+esm';
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=7';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=9';
 
 export const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
@@ -21,7 +21,7 @@ export const fmt = v => { const t = typeof v === 'number' ? v : Date.parse(v); r
 export const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
 
 export function toast(t) { const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 3000); }
-export function floatEmo(e) { const d = document.createElement('div'); d.className = 'float'; d.textContent = e; d.style.left = (10 + Math.random() * 80) + 'vw'; document.body.append(d); setTimeout(() => d.remove(), 2500); }
+export function floatEmo(e) { const d = document.createElement('div'); d.className = 'float'; d.textContent = e; d.style.left = (10 + Math.random() * 80) + 'vw'; (document.fullscreenElement || document.body).append(d); setTimeout(() => d.remove(), 2500); }
 
 export function nameOf(id) {
   if (!id) return '';
@@ -89,10 +89,10 @@ export async function saveGame(key, data) {
 /* --- Tables --- */
 const tableHandlers = {};
 export function onTable(t, fn) { (tableHandlers[t] ||= []).push(fn); }
-const ORDER = { notes: ['created_at', false], memories: ['created_at', false], chapters: ['position', true], dates: ['when_at', true], films: ['created_at', false], quiz: ['created_at', false], strokes: ['created_at', true] };
+const ORDER = { notes: ['created_at', false], memories: ['created_at', false], chapters: ['position', true], dates: ['when_at', true], films: ['created_at', false], quiz: ['created_at', false], strokes: ['created_at', true], chat: ['created_at', false] };
 export async function loadTable(t) {
   const [col, asc] = ORDER[t];
-  const { data, error } = await sb.from(t).select('*').eq('couple_id', st.couple.id).order(col, { ascending: asc, nullsFirst: false }).limit(t === 'strokes' ? 800 : 500);
+  const { data, error } = await sb.from(t).select('*').eq('couple_id', st.couple.id).order(col, { ascending: asc, nullsFirst: false }).limit(t === 'strokes' ? 800 : t === 'chat' ? 150 : 500);
   if (error) { console.error(error); return; }
   st.rows[t] = data || [];
   (tableHandlers[t] || []).forEach(fn => fn(st.rows[t]));

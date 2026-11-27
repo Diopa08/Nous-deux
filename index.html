@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,500&family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 <div class="stripe"></div>
@@ -101,19 +101,32 @@
 </section>
 
 <section data-v="appel">
+  <div class="cinema" id="cinema">
   <div class="stage" id="stage">
     <video id="vScreen" class="vscreen" playsinline autoplay hidden></video>
-    <video id="vRemote" class="vremote" playsinline autoplay></video>
+    <video id="vRemote" class="vremote" playsinline autoplay muted></video>
+    <audio id="aRemote" autoplay></audio>
+    <button class="unmute" id="unmuteBtn" hidden>🔊 Activer le son</button>
     <video id="vLocal" class="vlocal" playsinline autoplay muted></video>
     <div class="stageMsg" id="stageMsg">Lance un appel : ton chéri reçoit une sonnerie dans l'app.</div>
+    <div class="cineHint" id="cineHint">🍿 Partagez un onglet avec le film pour lancer la séance</div>
+    <div class="pops" id="pops" aria-live="polite"></div>
     <div class="boothCount" id="boothCount" hidden></div>
     <div class="flash" id="flash"></div>
+  </div>
+  <aside class="chatPanel" id="chatPanel" aria-label="Commentaires">
+    <div class="chatHead"><b>Nos commentaires</b><span class="mute" id="chatCount"></span></div>
+    <ul class="chatList" id="chatList"></ul>
+    <div class="emobar" id="emobar"></div>
+    <form class="chatForm" id="chatForm"><input id="chatIn" maxlength="500" placeholder="Un commentaire…" autocomplete="off" aria-label="Écrire un commentaire"><button aria-label="Envoyer">➤</button></form>
+  </aside>
   </div>
   <div class="row center">
     <button id="callBtn">📞 Appeler</button>
     <button class="ghost" id="micBtn" disabled>🎙️ Micro</button>
     <button class="ghost" id="camBtn" disabled>📷 Caméra</button>
     <button class="ghost" id="shareBtn" disabled>🖥️ Partager l'écran</button>
+    <button class="ghost" id="cineBtn">🍿 Mode ciné</button>
     <button class="ghost" id="boothBtn">📸 Photobooth</button>
     <button class="ghost" id="fullBtn">⛶ Plein écran</button>
   </div>
@@ -288,6 +301,6 @@
 </div>
 <p id="status" class="status" hidden></p>
 <div id="toast"></div>
-<script type="module" src="js/app.js?v=7"></script>
+<script type="module" src="js/app.js?v=9"></script>
 </body>
 </html>

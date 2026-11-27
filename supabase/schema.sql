@@ -177,3 +177,20 @@ drop policy if exists photos_rw on storage.objects;
 create policy photos_rw on storage.objects for all to authenticated
   using (bucket_id = 'photos' and (storage.foldername(name))[1] = (select public.my_couple())::text)
   with check (bucket_id = 'photos' and (storage.foldername(name))[1] = (select public.my_couple())::text);
+
+-- Chat du mode ciné
+create table if not exists public.chat (
+  id uuid primary key default gen_random_uuid(),
+  couple_id uuid not null default public.my_couple() references public.couples(id) on delete cascade,
+  author uuid not null default auth.uid(),
+  body text not null check (char_length(body) between 1 and 500),
+  created_at timestamptz not null default now()
+);
+create index if not exists chat_couple_idx on public.chat(couple_id, created_at desc);
+alter table public.chat enable row level security;
+drop policy if exists chat_all on public.chat;
+create policy chat_all on public.chat for all to authenticated
+  using (couple_id = (select public.my_couple()))
+  with check (couple_id = (select public.my_couple()) and author = (select auth.uid()));
+revoke all on public.chat from anon;
+alter publication supabase_realtime add table public.chat;
