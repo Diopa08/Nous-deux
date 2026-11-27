@@ -1,7 +1,7 @@
 import { sb, st, $, esc, fmt, uid, toast, floatEmo, nameOf, partnerName, q, oops, signedUrls, cachedUrl, uploadPhoto,
-  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=6';
-import { initGames } from './games.js?v=6';
-import { initCall } from './call.js?v=6';
+  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=7';
+import { initGames } from './games.js?v=7';
+import { initCall } from './call.js?v=7';
 
 /* =========================================================
    Connexion

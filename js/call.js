@@ -1,4 +1,4 @@
-import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, uploadPhoto, loadTable, q } from './core.js?v=6';
+import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, uploadPhoto, loadTable, q } from './core.js?v=7';
 
 /* =========================================================
    Appel vidéo (WebRTC pair-à-pair, signalisation par Supabase Realtime)
@@ -79,7 +79,7 @@ function routeStreams() {
     if (!scr) for (const [id, s] of remoteStreams) if (id !== remoteCamId) { scr = s; break; }
   }
   vS.hidden = !scr;
-  if (scr && vS.srcObject !== scr) vS.srcObject = scr;
+  if (scr && vS.srcObject !== scr) { vS.srcObject = scr; vS.play?.().catch(() => info('Touche la vidéo pour activer le son.')); }
   if (!scr) vS.srcObject = null;
   stage.classList.toggle('sharing', !!scr);
   if (scr) stageMsg('');
@@ -138,12 +138,20 @@ function hangup(notify = true) {
 /* --- Partage d'écran --- */
 async function startShare() {
   if (!pc) return toast('Lance d\'abord l\'appel.');
-  try { screen = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: true }); }
-  catch (e) { return; }
-  send('screen', { on: true, id: screen.id });
+  try {
+    screen = await navigator.mediaDevices.getDisplayMedia({
+      video: { frameRate: 30 },
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, suppressLocalAudioPlayback: false },
+      systemAudio: 'include', selfBrowserSurface: 'exclude', surfaceSwitching: 'include',
+    });
+  } catch (e) { return; }
+  const hasAudio = screen.getAudioTracks().length > 0;
+  send('screen', { on: true, id: screen.id, audio: hasAudio });
   screenSenders = screen.getTracks().map(t => pc.addTrack(t, screen));
   screen.getVideoTracks()[0].addEventListener('ended', () => stopShare());
-  info(screen.getAudioTracks().length ? 'Tu partages ton écran avec le son.' : 'Tu partages ton écran (sans le son : choisis un onglet et coche « Partager l\'audio »).');
+  const safari = /^((?!chrome|android|crios|edg).)*safari/i.test(navigator.userAgent);
+  info(hasAudio ? 'Tu partages ton écran avec le son.' : safari ? 'Safari ne partage pas le son : utilise Chrome ou Edge pour partager un film avec le son.' : 'Partage SANS le son : arrête, relance, choisis l\'onglet « Onglet Chrome » et coche « Partager aussi l\'audio de l\'onglet ».');
+  if (!hasAudio) toast('Le son n\'est pas partagé');
   buttons();
 }
 function stopShare(notify = true) {
@@ -217,6 +225,7 @@ export function initCall() {
   $('micBtn').onclick = () => { const a = local?.getAudioTracks()[0]; if (a) { a.enabled = !a.enabled; buttons(); } };
   $('camBtn').onclick = () => { const v = local?.getVideoTracks()[0]; if (v) { v.enabled = !v.enabled; buttons(); } };
   $('shareBtn').onclick = () => screen ? stopShare() : startShare();
+  vS.addEventListener('click', () => { vS.muted = false; vS.play?.().catch(() => { }); info(''); });
   $('fullBtn').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else stage.requestFullscreen?.().catch(() => { }); };
   $('boothBtn').onclick = () => { $('boothPanel').hidden = !$('boothPanel').hidden; };
   $('boothGo').onclick = () => {
@@ -239,7 +248,7 @@ export function initCall() {
   listen('call-join', () => { if (inCall && !pc) { stageMsg('Connexion…'); makePC(); } });
   listen('call-end', p => { if (ringing) showRing(false); if (inCall) { hangup(false); toast(p.declined ? partnerName() + ' ne peut pas maintenant' : partnerName() + ' a raccroché'); } });
   listen('sig', onSig);
-  listen('screen', p => { remoteScreenId = p.on ? String(p.id || '') : null; if (!p.on) { for (const id of [...remoteStreams.keys()]) if (id !== remoteCamId) remoteStreams.delete(id); } routeStreams(); if (p.on) { location.hash = 'appel'; toast(partnerName() + ' partage son écran'); } });
+  listen('screen', p => { remoteScreenId = p.on ? String(p.id || '') : null; if (!p.on) { for (const id of [...remoteStreams.keys()]) if (id !== remoteCamId) remoteStreams.delete(id); } routeStreams(); if (p.on) { location.hash = 'appel'; toast(partnerName() + (p.audio === false ? ' partage son écran, mais sans le son' : ' partage son écran')); vS.muted = false; vS.play?.().catch(() => { info('Touche la vidéo pour activer le son.'); }); } });
   listen('booth', p => { if (typeof p.at === 'number' && Math.abs(p.at - Date.now()) < 15000) runBooth({ at: p.at, filter: String(p.filter || 'none'), text: String(p.text || '').slice(0, 40) }); });
   listen('presence', h => { const was = here; here = h; if (h && !was && inCall && !pc) send('call-ring', {}); });
   listen('presence', here => { if (!here && inCall && pc) info(partnerName() + ' a quitté l\'app.'); });
