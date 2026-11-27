@@ -1,4 +1,4 @@
-import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=9';
+import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=10';
 
 /* =========================================================
    Appel vidéo (WebRTC pair-à-pair, signalisation par Supabase Realtime)
@@ -39,7 +39,7 @@ async function getCam(audio = true) {
   } catch (e) {
     toast('Autorise la caméra et le micro dans ton navigateur.'); throw e;
   }
-  vL.srcObject = local; vL.hidden = false; buttons();
+  vL.srcObject = local; vL.hidden = false; buttons(); meter(local, vL, true); silentSince = 0; silentWarned = false;
   return local;
 }
 
@@ -72,7 +72,7 @@ function makePC() {
 function routeStreams() {
   if (!remoteCamId || !remoteStreams.has(remoteCamId)) { remoteCamId = null; for (const id of remoteStreams.keys()) if (id !== remoteScreenId) { remoteCamId = id; break; } }
   const cam = remoteStreams.get(remoteCamId);
-  if (cam && vR.srcObject !== cam) { vR.srcObject = cam; aR.srcObject = cam; resume(); }
+  if (cam && vR.srcObject !== cam) { vR.srcObject = cam; aR.srcObject = cam; resume(); meter(cam, vR, false); }
   let scr = null;
   if (screen) { if (vS.srcObject !== screen) { vS.srcObject = screen; vS.muted = true; } vS.hidden = false; stage.classList.add('sharing'); stageMsg(''); return; }
   if (remoteScreenId) {
@@ -101,6 +101,32 @@ async function onSig({ description, candidate }) {
     }
   } catch (e) { console.error(e); }
 }
+
+/* --- Niveaux sonores : anneau qui bouge quand on parle + alerte micro muet --- */
+let meterCtx = null, meters = [], silentSince = 0, silentWarned = false;
+function meter(stream, el, mine) {
+  try {
+    if (!stream || !stream.getAudioTracks().length) return;
+    meterCtx ||= new AudioContext(); meterCtx.resume?.();
+    const src = meterCtx.createMediaStreamSource(new MediaStream(stream.getAudioTracks()));
+    const an = meterCtx.createAnalyser(); an.fftSize = 512; src.connect(an);
+    meters = meters.filter(m => m.el !== el); meters.push({ an, el, mine, buf: new Float32Array(an.fftSize) });
+  } catch (e) { }
+}
+function meterLoop() {
+  for (const m of meters) {
+    m.an.getFloatTimeDomainData(m.buf); let sum = 0; for (const v of m.buf) sum += v * v;
+    const rms = Math.sqrt(sum / m.buf.length), lvl = Math.min(1, rms * 12);
+    m.el.style.setProperty('--lvl', lvl.toFixed(2));
+    if (m.mine && inCall && local?.getAudioTracks()[0]?.enabled) {
+      if (rms > 0.002) { silentSince = 0; if (silentWarned) { silentWarned = false; info(''); send('mic', { silent: false }); } }
+      else if (!silentSince) silentSince = Date.now();
+      else if (!silentWarned && Date.now() - silentSince > 12000) { silentWarned = true; info('⚠️ Ton micro n\'envoie aucun son. Vérifie qu\'il est autorisé pour ton navigateur (Mac : Réglages Système → Confidentialité et sécurité → Microphone), puis recharge la page.'); send('mic', { silent: true }); }
+    }
+  }
+  requestAnimationFrame(meterLoop);
+}
+requestAnimationFrame(meterLoop);
 
 /* --- Son : relance les lecteurs mis en pause par le navigateur --- */
 function resume() {
@@ -259,6 +285,7 @@ export function initCall() {
   listen('call-join', () => { if (inCall && !pc) { stageMsg('Connexion…'); makePC(); } });
   listen('call-end', p => { if (ringing) showRing(false); if (inCall) { hangup(false); toast(p.declined ? partnerName() + ' ne peut pas maintenant' : partnerName() + ' a raccroché'); } });
   listen('sig', onSig);
+  listen('mic', p => info(p.silent ? '⚠️ Le micro de ' + partnerName() + ' n\'envoie aucun son (son navigateur n\'a pas accès au micro).' : ''));
   listen('screen', p => { remoteScreenId = p.on ? String(p.id || '') : null; if (!p.on) { for (const id of [...remoteStreams.keys()]) if (id !== remoteCamId) remoteStreams.delete(id); } routeStreams(); if (p.on) { location.hash = 'appel'; dispatch('cine-auto', true); toast(partnerName() + (p.audio === false ? ' partage son écran, mais sans le son' : ' partage son écran')); vS.muted = false; resume(); } });
   listen('booth', p => { if (typeof p.at === 'number' && Math.abs(p.at - Date.now()) < 15000) runBooth({ at: p.at, filter: String(p.filter || 'none'), text: String(p.text || '').slice(0, 40) }); });
   listen('presence', h => { const was = here; here = h; if (h && !was && inCall && !pc) send('call-ring', {}); });
