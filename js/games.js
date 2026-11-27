@@ -1,4 +1,4 @@
-import { sb, st, $, esc, norm, uid, toast, floatEmo, nameOf, partnerName, q, signedUrls, cachedUrl, listen, send, onGame, saveGame, onTable, loadTable } from './core.js?v=17';
+import { sb, st, $, esc, norm, uid, toast, floatEmo, nameOf, partnerName, q, signedUrls, cachedUrl, listen, send, onGame, saveGame, onTable, loadTable } from './core.js?v=18';
 
 const QUESTIONS = ["Quel moment avec moi revivrais-tu encore et encore ?", "Qu'est-ce qui te manque le plus chez moi cette semaine ?", "Où est-ce qu'on vivra dans 5 ans ?", "Quelle petite habitude à moi te fait sourire ?", "Quel serait notre voyage de rêve ?", "Quelle chanson te fait penser à nous ?", "Que veux-tu qu'on fasse en premier quand on se revoit ?", "Ton souvenir préféré de notre premier rendez-vous ?", "Qu'est-ce que je fais qui te fait te sentir aimé·e ?", "Un rêve que tu n'as jamais dit à personne ?", "Une journée entière sans contrainte : on fait quoi ?", "Qu'as-tu appris sur toi depuis qu'on est ensemble ?"];
 const TP = [["Un appel vidéo de 3 h", "10 vocaux surprises dans la journée"], ["Un week-end à la plage", "Un week-end à la montagne"], ["Cuisiner ensemble", "Aller au resto"], ["Une lettre écrite à la main", "Une playlist faite pour toi"], ["Un film d'horreur", "Une comédie romantique"], ["Le lever du soleil", "Les étoiles tard le soir"], ["Un voyage surprise", "Un voyage planifié ensemble"], ["Danser toute la nuit", "Une soirée canapé"]];
@@ -9,50 +9,6 @@ const g = k => st.games[k] || null;
 const clone = o => JSON.parse(JSON.stringify(o || {}));
 
 export function initGames() {
-  /* ---------------- Puzzle photo ---------------- */
-  let pick = -1;
-  const photos = () => (st.rows.memories || []);
-  onTable('memories', rows => {
-    const cur = $('pzPhoto').value;
-    $('pzPhoto').innerHTML = rows.length ? rows.map((m, i) => `<option value="${esc(m.path)}">${esc(m.caption || 'Photo ' + (rows.length - i))}</option>`).join('') : '<option value="">Ajoutez d\'abord des photos dans Souvenirs</option>';
-    if (cur) $('pzPhoto').value = cur;
-  });
-  function shuffled(n) {
-    const a = [...Array(n * n).keys()];
-    do { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } } while (a.every((v, i) => v === i));
-    return a;
-  }
-  $('pzNew').onclick = async () => {
-    const path = $('pzPhoto').value; if (!path) return toast('Ajoutez une photo dans Souvenirs.');
-    const n = +$('pzSize').value;
-    pick = -1;
-    await saveGame('puzzle', { path, n, order: shuffled(n), moves: 0, startedAt: Date.now(), solvedAt: 0, by: st.me });
-  };
-  async function renderPuzzle() {
-    const p = g('puzzle'), el = $('puzzle');
-    if (!p || !p.path || !Array.isArray(p.order)) { el.innerHTML = ''; el.style.display = 'none'; $('pzInfo').textContent = 'Choisissez une photo et lancez un puzzle.'; return; }
-    el.style.display = 'grid';
-    const n = p.n, url = (await signedUrls([p.path]))[p.path];
-    el.style.gridTemplateColumns = `repeat(${n},1fr)`;
-    el.classList.toggle('done', !!p.solvedAt);
-    el.innerHTML = p.order.map((piece, i) => {
-      const x = piece % n, y = Math.floor(piece / n);
-      return `<button data-i="${i}" class="${i === pick ? 'pick' : ''}" aria-label="Pièce ${i + 1}" style="background-image:url('${esc(url)}');background-size:${n * 100}% ${n * 100}%;background-position:${n > 1 ? x / (n - 1) * 100 : 0}% ${n > 1 ? y / (n - 1) * 100 : 0}%"></button>`;
-    }).join('');
-    const ok = p.order.filter((v, i) => v === i).length;
-    $('pzInfo').textContent = p.solvedAt ? `🎉 Terminé en ${p.moves} coups et ${Math.max(1, Math.round((p.solvedAt - p.startedAt) / 60000))} min !` : `${ok}/${n * n} pièces bien placées · ${p.moves} coups`;
-  }
-  onGame('puzzle', renderPuzzle);
-  $('puzzle').onclick = e => {
-    const b = e.target.closest('[data-i]'); const p = g('puzzle'); if (!b || !p || p.solvedAt) return;
-    const i = +b.dataset.i;
-    if (pick < 0) { pick = i; renderPuzzle(); send('pz-pick', { i }); return; }
-    if (pick === i) { pick = -1; renderPuzzle(); return; }
-    const n2 = clone(p); [n2.order[pick], n2.order[i]] = [n2.order[i], n2.order[pick]]; n2.moves = (n2.moves || 0) + 1; pick = -1;
-    if (n2.order.every((v, k) => v === k)) { n2.solvedAt = Date.now(); floatEmo('🎉'); }
-    saveGame('puzzle', n2);
-  };
-
   /* ---------------- Dessin à deux ---------------- */
   const COLS = ['#1b1b1b', '#d32f45', '#1d3fa5', '#0d8f80', '#f0a020', '#8e3b5f', '#ffffff'];
   let col = COLS[1], strokes = [], live = {}, cur = null, lastEmit = 0;

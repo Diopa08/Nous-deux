@@ -205,6 +205,23 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .gtile span{font-size:13px;color:var(--mute);font-weight:400}
 .gtile .live{font-size:12px;color:var(--a);font-weight:700}
 .gamebar{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+/* Puzzle */
+#jigSetup .boothOpts{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.jRecords{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:14px}
+.jRecords div{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:14px}
+.jRecords b{display:block;color:var(--b)}
+.jigHud{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:10px;font-size:15px}
+.jTime{font:700 26px/1 "DM Sans";color:var(--a);font-variant-numeric:tabular-nums}
+.jigBtns{margin-left:auto;display:flex;gap:6px}
+.jigBtns button{min-height:40px;padding:6px 12px}
+.jigWrap{overflow:auto;border-radius:16px;background:repeating-linear-gradient(45deg,#3b2a20 0 22px,#43302a 22px 44px);max-height:78vh;touch-action:pan-x pan-y}
+.jigTable{position:relative;margin:auto}
+.jigFrame{position:absolute;background:#0003;border:2px dashed #fff8;border-radius:4px;background-size:100% 100%}
+.jigFrame.peek{background-color:#0000}
+.jigTable canvas{position:absolute;cursor:grab;touch-action:none;filter:drop-shadow(0 3px 4px #0007)}
+.jigTable canvas.lock{cursor:default;filter:none;pointer-events:none}
+.jigTable canvas.drag{cursor:grabbing;filter:drop-shadow(0 10px 12px #000a)}
+.jigTable canvas.other{filter:drop-shadow(0 0 6px #ff8fab) drop-shadow(0 3px 4px #0007)}
 /* Puissance 4 */
 .p4{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:var(--b);padding:10px;border-radius:16px;max-width:460px;margin:10px auto}
 .p4 button{aspect-ratio:1;border-radius:50%;padding:0;min-height:0;background:var(--bg);border:0;box-shadow:inset 0 3px 6px #0003}

@@ -1,4 +1,4 @@
-import { sb, st, $, esc, toast, floatEmo, nameOf, partner, partnerName, onGame, saveGame, signedUrls, listen } from './core.js?v=17';
+import { sb, st, $, esc, toast, floatEmo, nameOf, partner, partnerName, onGame, saveGame, signedUrls, listen } from './core.js?v=18';
 
 const g = k => st.games[k] || null;
 const clone = o => JSON.parse(JSON.stringify(o || {}));
@@ -9,7 +9,7 @@ const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.f
    Menu des jeux
    ========================================================= */
 const GAMES = [
-  ['puzzle', '🧩', 'Puzzle photo', 'Vos photos à reconstituer'],
+  ['puzzle', '🧩', 'Puzzle', 'Vraies pièces, en course ou ensemble'],
   ['dessin', '🎨', 'Dessin à deux', 'Dessinez et devinez'],
   ['p4', '🔴', 'Puissance 4', 'Alignez 4 jetons'],
   ['pendu', '🪢', 'Pendu', 'Trouvez le mot secret'],
