@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,500&family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 <div class="stripe"></div>
@@ -189,15 +189,17 @@
 </section>
 
 <section data-v="jeux">
-  <div class="card">
-    <h2>Puzzle photo</h2>
+  <div class="gamemenu" id="gameMenu"></div>
+  <div class="gamebar" id="gameBar" hidden><button class="ghost" id="gameBack">← Tous les jeux</button><h2 id="gameTitle" style="margin:0"></h2></div>
+
+  <div class="card game" data-g="puzzle" hidden>
     <p class="mute">Une de vos photos, découpée et mélangée. Touchez deux pièces pour les échanger : vous jouez sur le même puzzle, en même temps.</p>
     <div class="row"><select id="pzPhoto"></select><select id="pzSize" style="flex:0 1 120px"><option value="3">3 × 3</option><option value="4" selected>4 × 4</option><option value="5">5 × 5</option><option value="6">6 × 6</option></select><button id="pzNew">Nouveau puzzle</button></div>
     <p class="mute center" id="pzInfo"></p>
     <div class="puzzle" id="puzzle"></div>
   </div>
-  <div class="card">
-    <h2>Dessin à deux</h2>
+
+  <div class="card game" data-g="dessin" hidden>
     <p class="mute">Dessinez en même temps sur la même feuille. « Devine mon dessin » : l'un tire un mot secret, l'autre devine.</p>
     <div class="row" id="swatches"></div>
     <div class="canvasWrap"><canvas id="cv"></canvas></div>
@@ -205,39 +207,82 @@
     <div class="word" id="dvWord"></div>
     <div class="row" id="dvGuessRow" hidden><input id="dvGuess" placeholder="Ta réponse…" maxlength="40"><button id="dvGuessBtn">Deviner</button></div>
   </div>
-  <div class="grid">
-    <div class="card">
-      <h2>Tu me connais ?</h2>
-      <p class="mute">Pose une question sur toi avec ta réponse. L'autre devine, puis découvre la vérité.</p>
-      <input id="qzQ" maxlength="300" placeholder="Mon plat préféré quand j'étais petit·e ?">
-      <input id="qzA" maxlength="200" placeholder="La bonne réponse (cachée)">
-      <div class="row"><button id="qzBtn">Poser la question</button></div>
-      <ul class="list" id="quiz"></ul>
+
+  <div class="card game" data-g="p4" hidden>
+    <p class="mute center" id="p4Status"></p>
+    <div class="p4" id="p4"></div>
+    <div class="row center"><button class="ghost" id="p4Reset">Nouvelle partie</button></div>
+  </div>
+
+  <div class="card game" data-g="pendu" hidden>
+    <div class="penduTop"><svg id="penduSvg" viewBox="0 0 120 130" class="penduSvg" aria-label="Pendu"></svg>
+      <div><div class="penduWord" id="penduWord"></div><p class="mute" id="penduInfo"></p></div></div>
+    <div class="keys" id="penduKeys"></div>
+    <div class="row"><input id="penduSecret" maxlength="24" placeholder="Mot secret pour l'autre" autocomplete="off"><button id="penduSet">Faire deviner ce mot</button><button class="ghost" id="penduRand">Mot au hasard (à deux)</button></div>
+  </div>
+
+  <div class="card game" data-g="navale" hidden>
+    <p class="mute center" id="nvStatus"></p>
+    <div class="navale">
+      <div><h3 class="nvh">Ma flotte</h3><div class="nvgrid" id="nvMine"></div></div>
+      <div><h3 class="nvh">Sa flotte</h3><div class="nvgrid" id="nvTheirs"></div></div>
     </div>
-    <div class="card">
-      <h2>Action ou vérité</h2>
-      <div class="deck" id="aov"><span class="mute">Tirez une carte.</span></div>
-      <div class="row center"><button id="aovA">Action</button><button class="ghost" id="aovV">Vérité</button></div>
-    </div>
-    <div class="card">
-      <h2>Morpion</h2>
-      <p class="mute" id="mStatus"></p>
-      <div class="board" id="board"></div>
-      <div class="row center"><button class="ghost" id="mReset">Nouvelle partie</button></div>
-    </div>
-    <div class="card">
-      <h2>Question du jour</h2>
-      <p class="hand" id="qText"></p>
-      <textarea id="qAns" maxlength="400" placeholder="Ta réponse…"></textarea>
-      <div class="row"><button id="qBtn">Répondre</button><button class="ghost" id="qNext">Autre question</button></div>
-      <ul class="list" id="qAnswers"></ul>
-    </div>
-    <div class="card">
-      <h2>Tu préfères…</h2>
-      <div class="row"><button class="ghost grow" id="tpA"></button><button class="ghost grow" id="tpB"></button></div>
-      <p class="mute" id="tpRes"></p>
-      <div class="row"><button class="ghost" id="tpNext">Suivant</button></div>
-    </div>
+    <div class="row center"><button class="ghost" id="nvShuffle">🔀 Replacer mes bateaux</button><button id="nvReady">Prêt !</button><button class="ghost" id="nvNew">Nouvelle partie</button></div>
+  </div>
+
+  <div class="card game" data-g="memory" hidden>
+    <p class="mute center" id="memStatus"></p>
+    <div class="memory" id="memory"></div>
+    <div class="row center"><button class="ghost" id="memNew">Nouvelle partie</button></div>
+  </div>
+
+  <div class="card game" data-g="mime" hidden>
+    <p class="mute">Pendant l'appel vidéo : l'un mime le mot (sans parler !), l'autre devine à voix haute avant la fin du chrono.</p>
+    <div class="mimeBox"><div class="mimeWord" id="mimeWord">—</div><div class="mimeTime" id="mimeTime"></div></div>
+    <p class="mute center" id="mimeInfo"></p>
+    <div class="row center"><button id="mimeGo">🎭 Je mime</button><button class="ghost" id="mimeFound" hidden>✓ Trouvé !</button><button class="ghost" id="mimeSkip" hidden>Passer</button></div>
+  </div>
+
+  <div class="card game" data-g="qui" hidden>
+    <p class="mute">Chacun vote en secret. On découvre les réponses quand vous avez voté tous les deux.</p>
+    <p class="hand center" id="quiQ"></p>
+    <div class="row center" id="quiBtns"></div>
+    <p class="center" id="quiRes"></p>
+    <div class="row center"><button class="ghost" id="quiNext">Question suivante</button></div>
+  </div>
+
+  <div class="card game" data-g="roue" hidden>
+    <div class="roueWrap"><svg id="roue" viewBox="-110 -110 220 220" class="roue" aria-label="Roue des défis"></svg><div class="roueArrow">▼</div></div>
+    <p class="hand center" id="roueRes"></p>
+    <div class="row center"><button id="roueGo">🎡 Tourner la roue</button></div>
+  </div>
+
+  <div class="card game" data-g="quiz" hidden>
+    <p class="mute">Pose une question sur toi avec ta réponse. L'autre devine, puis découvre la vérité.</p>
+    <input id="qzQ" maxlength="300" placeholder="Mon plat préféré quand j'étais petit·e ?">
+    <input id="qzA" maxlength="200" placeholder="La bonne réponse (cachée)">
+    <div class="row"><button id="qzBtn">Poser la question</button></div>
+    <ul class="list" id="quiz"></ul>
+  </div>
+  <div class="card game" data-g="aov" hidden>
+    <div class="deck" id="aov"><span class="mute">Tirez une carte.</span></div>
+    <div class="row center"><button id="aovA">Action</button><button class="ghost" id="aovV">Vérité</button></div>
+  </div>
+  <div class="card game" data-g="morpion" hidden>
+    <p class="mute center" id="mStatus"></p>
+    <div class="board" id="board"></div>
+    <div class="row center"><button class="ghost" id="mReset">Nouvelle partie</button></div>
+  </div>
+  <div class="card game" data-g="question" hidden>
+    <p class="hand" id="qText"></p>
+    <textarea id="qAns" maxlength="400" placeholder="Ta réponse…"></textarea>
+    <div class="row"><button id="qBtn">Répondre</button><button class="ghost" id="qNext">Autre question</button></div>
+    <ul class="list" id="qAnswers"></ul>
+  </div>
+  <div class="card game" data-g="tuprefs" hidden>
+    <div class="row"><button class="ghost grow" id="tpA"></button><button class="ghost grow" id="tpB"></button></div>
+    <p class="mute" id="tpRes"></p>
+    <div class="row"><button class="ghost" id="tpNext">Suivant</button></div>
   </div>
 </section>
 
@@ -307,6 +352,6 @@
 </div>
 <p id="status" class="status" hidden></p>
 <div id="toast"></div>
-<script type="module" src="js/app.js?v=13"></script>
+<script type="module" src="js/app.js?v=14"></script>
 </body>
 </html>

@@ -194,3 +194,19 @@ create policy chat_all on public.chat for all to authenticated
   with check (couple_id = (select public.my_couple()) and author = (select auth.uid()));
 revoke all on public.chat from anon;
 alter publication supabase_realtime add table public.chat;
+
+-- État privé d'un joueur (ex. position de ses bateaux) : lisible par lui seul
+create table if not exists public.private_state (
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  couple_id uuid not null default public.my_couple() references public.couples(id) on delete cascade,
+  key text not null check (char_length(key) <= 40),
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  primary key (user_id, key)
+);
+alter table public.private_state enable row level security;
+drop policy if exists private_state_own on public.private_state;
+create policy private_state_own on public.private_state for all to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()) and couple_id = (select public.my_couple()));
+revoke all on public.private_state from anon;

@@ -1,8 +1,9 @@
 import { sb, st, $, esc, fmt, uid, toast, floatEmo, nameOf, partnerName, q, oops, signedUrls, cachedUrl, uploadPhoto,
-  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=13';
-import { initGames } from './games.js?v=13';
-import { initCall } from './call.js?v=13';
-import { initCinema } from './cinema.js?v=13';
+  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=14';
+import { initGames } from './games.js?v=14';
+import { initGames2 } from './games2.js?v=14';
+import { initCall } from './call.js?v=14';
+import { initCinema } from './cinema.js?v=14';
 
 /* =========================================================
    Connexion
@@ -85,6 +86,7 @@ async function boot() {
   await Promise.all([loadSettings(), loadGames(), ...TABLES.map(loadTable)]);
   subscribe();
   route();
+  dispatch('booted');
 }
 sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_IN' && !booted) boot(); if (ev === 'SIGNED_OUT') show('auth'); });
 
@@ -402,6 +404,7 @@ $('watch').onclick = async e => {
    ========================================================= */
 listen('members', () => { TABLES.forEach(t => st.rows[t] && loadTable(t)); });
 initGames();
+initGames2();
 initCall();
 initCinema();
 route();

@@ -161,6 +161,55 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .word{font:700 28px/1.1 "DM Sans";color:var(--a);text-align:center;margin:8px 0}
 .deck{text-align:center;padding:22px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--line);min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
 .tag{font-size:13px;font-weight:700;color:var(--a)}
+
+/* Menu des jeux */
+.gamemenu{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.gtile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-weight:500;min-height:118px;transition:transform .15s,box-shadow .15s}
+.gtile:hover{transform:translateY(-3px);box-shadow:0 10px 24px #0001}
+.gtile .gi{font-size:34px;line-height:1}
+.gtile b{font:700 calc(22px*var(--dsz))/1.1 var(--disp);color:var(--b)}
+.gtile span{font-size:13px;color:var(--mute);font-weight:400}
+.gtile .live{font-size:12px;color:var(--a);font-weight:700}
+.gamebar{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+/* Puissance 4 */
+.p4{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:var(--b);padding:10px;border-radius:16px;max-width:460px;margin:10px auto}
+.p4 button{aspect-ratio:1;border-radius:50%;padding:0;min-height:0;background:var(--bg);border:0;box-shadow:inset 0 3px 6px #0003}
+.p4 button.r{background:#e63946}.p4 button.y{background:#ffc93c}
+.p4 button.win{outline:4px solid #fff;outline-offset:-4px}
+.p4 button.drop{animation:drop .35s ease-in}
+@keyframes drop{from{transform:translateY(-300%)}}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin:0 4px}
+/* Pendu */
+.penduTop{display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center}
+.penduSvg{width:150px;height:auto;flex:none}
+.penduWord{font:700 clamp(26px,6vw,40px)/1.2 "DM Sans";letter-spacing:.25em;color:var(--b);text-align:center;overflow-wrap:anywhere}
+.keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;margin:14px 0}
+.keys button{min-height:44px;padding:0;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;font-weight:700}
+.keys button.ok{background:#2e7d32;color:#fff;border-color:#2e7d32}.keys button.ko{background:var(--line);color:var(--mute);text-decoration:line-through}
+/* Bataille navale */
+.navale{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px;margin-top:8px}
+.nvh{margin:0 0 6px;font:700 calc(22px*var(--dsz))/1 var(--disp);color:var(--b);text-align:center}
+.nvgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:#1d6fa5;padding:6px;border-radius:12px;max-width:380px;margin:auto}
+.nvgrid button,.nvgrid i{aspect-ratio:1;border-radius:4px;background:#8fd3ff;padding:0;min-height:0;border:0;display:grid;place-items:center;font-size:16px;font-style:normal;color:#fff}
+.nvgrid .ship{background:#40506b}.nvgrid .x{background:#e63946}.nvgrid .o{background:#cfeeff;color:#1d6fa5}.nvgrid .p{background:#ffc93c}
+.nvgrid button:not(:disabled):hover{background:#ffffff}
+/* Memory */
+.memory{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:520px;margin:10px auto}
+.memory button{aspect-ratio:1;padding:0;min-height:0;border-radius:12px;background:var(--b);color:#fff;font-size:clamp(26px,7vw,44px);overflow:hidden;position:relative}
+.memory button::after{content:"♥";position:absolute;inset:0;display:grid;place-items:center;font-size:28px;opacity:.5}
+.memory button.up,.memory button.done{background:var(--card);border:2px solid var(--line)}
+.memory button.up::after,.memory button.done::after{display:none}
+.memory button.done{opacity:.55;border-color:#2e7d32}
+.memory img{width:100%;height:100%;object-fit:cover;display:block}
+/* Mime */
+.mimeBox{text-align:center;padding:24px 12px;border-radius:16px;background:var(--bg);border:1px solid var(--line);margin:10px 0}
+.mimeWord{font:700 clamp(30px,8vw,52px)/1.1 var(--disp);color:var(--b)}
+.mimeTime{font:700 40px/1 "DM Sans";color:var(--a);margin-top:8px;font-variant-numeric:tabular-nums}
+/* Roue */
+.roueWrap{position:relative;max-width:340px;margin:10px auto}
+.roue{width:100%;height:auto;display:block}
+.roue g{transition:transform 4.2s cubic-bezier(.17,.67,.21,1)}
+.roueArrow{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:30px;color:var(--a);text-shadow:0 2px 4px #0004}
 /* Ciné */
 .big{font:700 clamp(54px,16vw,110px)/1 "DM Sans";color:var(--a);text-align:center;font-variant-numeric:tabular-nums}
 .tc{font:700 clamp(30px,8vw,48px)/1 "DM Sans";text-align:center;font-variant-numeric:tabular-nums;color:var(--b)}
