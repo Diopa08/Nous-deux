@@ -1,4 +1,4 @@
-import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=10';
+import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=11';
 
 /* =========================================================
    Appel vidéo (WebRTC pair-à-pair, signalisation par Supabase Realtime)
@@ -35,11 +35,11 @@ function buttons() {
 async function getCam(audio = true) {
   if (local) return local;
   try {
-    local = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: audio ? { echoCancellation: true, noiseSuppression: true } : false });
+    local = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: audio ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true, ...(micId() ? { deviceId: { exact: micId() } } : {}) } : false });
   } catch (e) {
     toast('Autorise la caméra et le micro dans ton navigateur.'); throw e;
   }
-  vL.srcObject = local; vL.hidden = false; buttons(); meter(local, vL, true); silentSince = 0; silentWarned = false;
+  vL.srcObject = local; vL.hidden = false; buttons(); meter(local, vL, true); silentSince = 0; silentWarned = false; listDevices();
   return local;
 }
 
@@ -72,7 +72,7 @@ function makePC() {
 function routeStreams() {
   if (!remoteCamId || !remoteStreams.has(remoteCamId)) { remoteCamId = null; for (const id of remoteStreams.keys()) if (id !== remoteScreenId) { remoteCamId = id; break; } }
   const cam = remoteStreams.get(remoteCamId);
-  if (cam && vR.srcObject !== cam) { vR.srcObject = cam; aR.srcObject = cam; resume(); meter(cam, vR, false); }
+  if (cam && vR.srcObject !== cam) { vR.srcObject = cam; voiceBoost(cam); resume(); meter(cam, vR, false); }
   let scr = null;
   if (screen) { if (vS.srcObject !== screen) { vS.srcObject = screen; vS.muted = true; } vS.hidden = false; stage.classList.add('sharing'); stageMsg(''); return; }
   if (remoteScreenId) {
@@ -128,9 +128,49 @@ function meterLoop() {
 }
 requestAnimationFrame(meterLoop);
 
+/* --- Voix de l'autre : passe par un amplificateur (volume jusqu'à 400 %) --- */
+let voiceGain = null, voiceSrc = null, voiceDest = null;
+const micId = () => { try { return localStorage.getItem('nd-mic') || ''; } catch (e) { return ''; } };
+function voiceBoost(stream) {
+  try {
+    meterCtx ||= new AudioContext();
+    voiceSrc?.disconnect();
+    voiceSrc = meterCtx.createMediaStreamSource(new MediaStream(stream.getAudioTracks()));
+    voiceGain ||= meterCtx.createGain();
+    voiceDest ||= meterCtx.createMediaStreamDestination();
+    voiceGain.gain.value = +$('volIn').value / 100;
+    voiceSrc.connect(voiceGain); try { voiceGain.disconnect(); } catch (e) { }
+    voiceGain.connect(voiceDest);
+    // l'élément audio joue le flux amplifié (garde le choix de sortie et marche même si le navigateur bride Web Audio)
+    aR.srcObject = voiceDest.stream; aR.muted = false; meterCtx.resume?.();
+  } catch (e) { aR.srcObject = stream; }
+}
+async function listDevices() {
+  try {
+    const ds = await navigator.mediaDevices.enumerateDevices();
+    const fill = (sel, kind, def) => { const cur = sel.value; sel.innerHTML = `<option value="">${def}</option>` + ds.filter(d => d.kind === kind && d.deviceId && d.deviceId !== 'default').map(d => `<option value="${d.deviceId.replace(/"/g, '')}">${(d.label || kind).replace(/[<>&"]/g, '')}</option>`).join(''); sel.value = cur; };
+    fill($('micSel'), 'audioinput', 'Micro par défaut'); $('micSel').value = micId();
+    fill($('outSel'), 'audiooutput', 'Haut-parleur par défaut');
+    $('outSel').closest('label').hidden = !('setSinkId' in HTMLMediaElement.prototype);
+  } catch (e) { }
+}
+async function switchMic(id) {
+  try { localStorage.setItem('nd-mic', id); } catch (e) { }
+  if (!local) return;
+  try {
+    const ns = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, ...(id ? { deviceId: { exact: id } } : {}) } });
+    const nt = ns.getAudioTracks()[0], old = local.getAudioTracks()[0];
+    const snd = pc?.getSenders().find(x => x.track && x.track === old);
+    if (snd) await snd.replaceTrack(nt);
+    if (old) { local.removeTrack(old); old.stop(); }
+    local.addTrack(nt); meter(local, vL, true); silentSince = 0; buttons(); toast('Micro changé');
+  } catch (e) { toast('Impossible d\'utiliser ce micro.'); }
+}
+
 /* --- Son : relance les lecteurs mis en pause par le navigateur --- */
 function resume() {
   let blocked = false;
+  if (meterCtx && meterCtx.state !== 'running') meterCtx.resume().catch(() => { }).then(() => { if (meterCtx.state !== 'running') $('unmuteBtn').hidden = false; });
   const tries = [[aR, true], [vR, false], [vS, !screen]];
   return Promise.all(tries.map(([el]) => el.srcObject && el.paused ? el.play().catch(() => { blocked = true; }) : null)).then(() => { $('unmuteBtn').hidden = !blocked; });
 }
@@ -261,7 +301,14 @@ export function initCall() {
   $('micBtn').onclick = () => { const a = local?.getAudioTracks()[0]; if (a) { a.enabled = !a.enabled; buttons(); } };
   $('camBtn').onclick = () => { const v = local?.getVideoTracks()[0]; if (v) { v.enabled = !v.enabled; buttons(); } };
   $('shareBtn').onclick = () => screen ? stopShare() : startShare();
-  $('unmuteBtn').onclick = () => { aR.muted = false; if (!screen) vS.muted = false; resume(); };
+  $('unmuteBtn').onclick = () => { aR.muted = false; if (!screen) vS.muted = false; meterCtx?.resume(); resume(); };
+  document.addEventListener('click', () => { if (meterCtx && meterCtx.state !== 'running') meterCtx.resume().catch(() => { }); });
+  $('volIn').oninput = () => { const v = +$('volIn').value; $('volVal').textContent = v + ' %'; if (voiceGain) voiceGain.gain.value = v / 100; try { localStorage.setItem('nd-vol', v); } catch (e) { } };
+  try { const v = localStorage.getItem('nd-vol'); if (v) { $('volIn').value = v; $('volVal').textContent = v + ' %'; } } catch (e) { }
+  $('micSel').onchange = () => switchMic($('micSel').value);
+  $('outSel').onchange = () => { const id = $('outSel').value; [aR, vS].forEach(el => el.setSinkId?.(id).catch(() => toast('Sortie audio indisponible'))); };
+  navigator.mediaDevices?.addEventListener?.('devicechange', listDevices);
+  listDevices();
   vS.addEventListener('click', () => { if (!screen) vS.muted = false; vS.play?.().catch(() => { }); info(''); });
   $('fullBtn').onclick = () => { const c = $('cinema'); if (document.fullscreenElement) document.exitFullscreen(); else (c.requestFullscreen || c.webkitRequestFullscreen)?.call(c)?.catch?.(() => { }); };
   $('boothBtn').onclick = () => { $('boothPanel').hidden = !$('boothPanel').hidden; };

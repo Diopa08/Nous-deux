@@ -1,8 +1,8 @@
 import { sb, st, $, esc, fmt, uid, toast, floatEmo, nameOf, partnerName, q, oops, signedUrls, cachedUrl, uploadPhoto,
-  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=10';
-import { initGames } from './games.js?v=10';
-import { initCall } from './call.js?v=10';
-import { initCinema } from './cinema.js?v=10';
+  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=11';
+import { initGames } from './games.js?v=11';
+import { initCall } from './call.js?v=11';
+import { initCinema } from './cinema.js?v=11';
 
 /* =========================================================
    Connexion
