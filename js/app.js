@@ -7,25 +7,44 @@ import { initCall } from './call.js';
    Connexion
    ========================================================= */
 let signup = false;
-$('aSwitch').onclick = () => { signup = !signup; $('aBtn').textContent = signup ? 'Créer mon compte' : 'Se connecter'; $('aSwitch').textContent = signup ? 'J\'ai déjà un compte' : 'Créer un compte'; $('aPass').autocomplete = signup ? 'new-password' : 'current-password'; $('aPass2Wrap').hidden = !signup; $('aPass2').required = signup; $('aMsg').textContent = ''; };
-document.addEventListener('click', e => { const b = e.target.closest('[data-eye]'); if (!b) return; const i = $(b.dataset.eye), show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.textContent = show ? '🙈' : '👁️'; b.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'); });
+function setMode(up) {
+  signup = up;
+  $('tabIn').setAttribute('aria-selected', String(!up)); $('tabUp').setAttribute('aria-selected', String(up));
+  $('aBtn').textContent = up ? 'Créer mon compte' : 'Se connecter';
+  $('aPass2Wrap').hidden = !up; $('aPass').autocomplete = up ? 'new-password' : 'current-password';
+  $('aMsg').textContent = ''; $('aMsg').className = 'formmsg'; checkMatch();
+}
+function checkMatch() {
+  const m = $('aMatch'), a = $('aPass').value, b = $('aPass2').value;
+  if (!signup || !b) { m.textContent = signup && a && a.length < 6 ? '6 caractères minimum' : ''; m.className = 'match ko'; return; }
+  const ok = a === b; m.textContent = ok ? '✓ Les mots de passe sont identiques' : '✗ Les mots de passe ne sont pas identiques'; m.className = 'match ' + (ok ? 'ok' : 'ko');
+}
+$('tabIn').onclick = () => setMode(false); $('tabUp').onclick = () => setMode(true);
+['aPass', 'aPass2'].forEach(id => $(id).addEventListener('input', checkMatch));
+document.addEventListener('click', e => { const b = e.target.closest('[data-eye]'); if (!b) return; const i = $(b.dataset.eye), show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.setAttribute('aria-pressed', String(show)); b.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'); });
+try { setMode(!localStorage.getItem('nd-known')); } catch (e) { setMode(false); }
+const msg = (t, info) => { $('aMsg').textContent = t; $('aMsg').className = 'formmsg' + (info ? ' info' : ''); };
 $('authForm').onsubmit = async e => {
   e.preventDefault();
   const email = $('aEmail').value.trim(), password = $('aPass').value;
-  if (signup && password !== $('aPass2').value) { $('aMsg').textContent = 'Les deux mots de passe ne sont pas identiques.'; return; }
-  $('aBtn').disabled = true; $('aMsg').textContent = '…';
+  if (!/^\S+@\S+\.\S+$/.test(email)) return msg('Entre une adresse email valide.');
+  if (password.length < 6) return msg('Le mot de passe doit faire au moins 6 caractères.');
+  if (signup && password !== $('aPass2').value) return msg('Les deux mots de passe ne sont pas identiques.');
+  $('aBtn').disabled = true; msg('Un instant…', true);
   try {
     if (signup) {
       const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
       if (error) throw error;
-      $('aMsg').textContent = data.session ? '' : 'Compte créé. Confirme ton email (lien reçu), puis connecte-toi ici.';
+      try { localStorage.setItem('nd-known', '1'); } catch (e) { }
+      if (!data.session) { setMode(false); $('aPass').value = ''; msg('Compte créé ! Ouvre l\'email reçu pour le confirmer, puis connecte-toi ici.', true); }
     } else {
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      try { localStorage.setItem('nd-known', '1'); } catch (e) { }
     }
   } catch (err) {
     const m = String(err.message || '');
-    $('aMsg').textContent = /confirm/i.test(m) ? 'Email pas encore confirmé : clique sur le lien reçu par mail.' : /invalid/i.test(m) ? 'Email ou mot de passe incorrect.' : m;
+    msg(/confirm/i.test(m) ? 'Email pas encore confirmé : clique sur le lien reçu par mail.' : /invalid/i.test(m) ? 'Email ou mot de passe incorrect.' : /already|registered/i.test(m) ? 'Ce compte existe déjà : connecte-toi.' : /rate|limit/i.test(m) ? 'Trop d\'essais, réessaie dans quelques minutes.' : m);
   } finally { $('aBtn').disabled = false; }
 };
 const logout = async () => { await sb.auth.signOut(); location.hash = ''; location.reload(); };

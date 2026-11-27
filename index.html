@@ -15,29 +15,63 @@
 
 <!-- Connexion -->
 <div id="auth" class="gate" hidden>
-  <div class="card gatecard">
-    <h1>Nous deux</h1>
-    <p class="mute">Notre petit coin à nous, malgré les kilomètres.</p>
-    <form id="authForm">
-      <label>Email<input type="email" id="aEmail" autocomplete="email" required></label>
-      <label>Mot de passe<span class="pw"><input type="password" id="aPass" autocomplete="current-password" minlength="6" required><button type="button" class="eye" data-eye="aPass" aria-label="Afficher le mot de passe">👁️</button></span></label>
-      <label id="aPass2Wrap" hidden>Confirme le mot de passe<span class="pw"><input type="password" id="aPass2" autocomplete="new-password" minlength="6"><button type="button" class="eye" data-eye="aPass2" aria-label="Afficher le mot de passe">👁️</button></span></label>
-      <div class="row"><button type="submit" id="aBtn">Se connecter</button><button type="button" class="ghost" id="aSwitch">Créer un compte</button></div>
-      <p class="mute" id="aMsg"></p>
-    </form>
+  <div class="gatebox">
+    <svg class="hero" viewBox="0 0 320 150" aria-hidden="true">
+      <path d="M40 118 Q160 -10 280 118" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>
+      <circle cx="40" cy="118" r="8" fill="var(--b)"/><circle cx="280" cy="118" r="8" fill="var(--a)"/>
+      <g transform="translate(118 30)"><rect width="84" height="58" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+        <path d="M0 0 L42 32 L84 0" fill="none" stroke="var(--line)" stroke-width="2"/>
+        <path d="M6 58h8l-6-6M22 58h8M38 58h8M54 58h8M70 58h8" stroke="var(--a)" stroke-width="3"/>
+        <path d="M42 40c-6-6-14-1-10 6l10 9 10-9c4-7-4-12-10-6Z" fill="var(--a)"/></g>
+    </svg>
+    <h1 class="gtitle">Nous deux</h1>
+    <p class="gsub">Notre petit coin à nous, malgré les kilomètres.</p>
+    <div class="card gatecard">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tabIn" aria-selected="true">Se connecter</button>
+        <button type="button" role="tab" id="tabUp" aria-selected="false">Créer un compte</button>
+      </div>
+      <form id="authForm" novalidate>
+        <div class="field"><label for="aEmail">Adresse email</label><input type="email" id="aEmail" autocomplete="email" placeholder="toi@exemple.com" required></div>
+        <div class="field"><label for="aPass">Mot de passe</label><div class="pw"><input type="password" id="aPass" autocomplete="current-password" minlength="6" placeholder="6 caractères minimum"><button type="button" class="eye" data-eye="aPass" aria-label="Afficher le mot de passe" aria-pressed="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="e-open" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle class="e-open" cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="e-shut" d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div>
+        <div class="field" id="aPass2Wrap" hidden><label for="aPass2">Confirme le mot de passe</label><div class="pw"><input type="password" id="aPass2" autocomplete="new-password" minlength="6" placeholder="6 caractères minimum"><button type="button" class="eye" data-eye="aPass2" aria-label="Afficher le mot de passe" aria-pressed="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="e-open" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle class="e-open" cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="e-shut" d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div>
+        <p class="match" id="aMatch" aria-live="polite"></p>
+        <button type="submit" id="aBtn" class="wide">Se connecter</button>
+        <p class="formmsg" id="aMsg" role="alert"></p>
+      </form>
+    </div>
   </div>
 </div>
 
 <!-- Création / rejoindre le couple -->
 <div id="onboard" class="gate" hidden>
-  <div class="card gatecard">
-    <h1>Bienvenue ♥</h1>
-    <label>Ton prénom<input id="oName" maxlength="40" placeholder="DIOPA"></label>
-    <div class="row"><button id="oCreate">Créer notre espace</button></div>
-    <p class="mute" style="margin-top:18px">Ton chéri a déjà créé l'espace ? Entre son code :</p>
-    <div class="row"><input id="oCode" maxlength="6" placeholder="AB12CD" style="text-transform:uppercase"><button class="ghost" id="oJoin">Rejoindre</button></div>
-    <p class="mute" id="oMsg"></p>
-    <div class="row"><button class="x" id="oLogout">Se déconnecter</button></div>
+  <div class="gatebox">
+    <svg class="hero" viewBox="0 0 320 150" aria-hidden="true">
+      <path d="M40 118 Q160 -10 280 118" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>
+      <circle cx="40" cy="118" r="8" fill="var(--b)"/><circle cx="280" cy="118" r="8" fill="var(--a)"/>
+      <g transform="translate(118 30)"><rect width="84" height="58" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+        <path d="M0 0 L42 32 L84 0" fill="none" stroke="var(--line)" stroke-width="2"/>
+        <path d="M6 58h8l-6-6M22 58h8M38 58h8M54 58h8M70 58h8" stroke="var(--a)" stroke-width="3"/>
+        <path d="M42 40c-6-6-14-1-10 6l10 9 10-9c4-7-4-12-10-6Z" fill="var(--a)"/></g>
+    </svg>
+    <h1 class="gtitle">Bienvenue ♥</h1>
+    <p class="gsub">Dernière étape : réunir vos deux comptes dans le même espace.</p>
+    <div class="card gatecard">
+      <div class="field"><label for="oName">Ton prénom</label><input id="oName" maxlength="40" placeholder="DIOPA" autocomplete="given-name"></div>
+      <div class="choice">
+        <h3>C'est moi qui commence</h3>
+        <p class="mute">Crée votre espace, puis donne le code à ton chéri.</p>
+        <button id="oCreate" class="wide">Créer notre espace</button>
+      </div>
+      <div class="or"><span>ou</span></div>
+      <div class="choice">
+        <h3>J'ai reçu un code</h3>
+        <input id="oCode" class="codein" maxlength="6" placeholder="AB12CD" autocomplete="off" aria-label="Code d'invitation">
+        <button class="ghost wide" id="oJoin">Rejoindre son espace</button>
+      </div>
+      <p class="formmsg" id="oMsg" role="alert"></p>
+      <button class="x linkbtn" id="oLogout">Se déconnecter</button>
+    </div>
   </div>
 </div>
 
