@@ -1,4 +1,4 @@
-import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=16';
+import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, dispatch, uploadPhoto, loadTable, q } from './core.js?v=17';
 
 /* =========================================================
    Appel vidéo (WebRTC pair-à-pair, signalisation par Supabase Realtime)
@@ -238,60 +238,12 @@ function stopShare(notify = true) {
 }
 
 /* =========================================================
-   Photobooth : 4 photos, décompte commun, bande souvenir
+   Accès caméra pour le photobooth (module booth.js)
    ========================================================= */
-let boothBusy = false, stripBlob = null;
-function grab(video, mirror) {
-  const W = 480, H = 360, c = document.createElement('canvas'); c.width = W; c.height = H;
-  const x = c.getContext('2d'), vw = video.videoWidth, vh = video.videoHeight;
-  if (!vw || !vh) { x.fillStyle = '#222'; x.fillRect(0, 0, W, H); return c; }
-  const s = Math.max(W / vw, H / vh), dw = vw * s, dh = vh * s;
-  if (mirror) { x.translate(W, 0); x.scale(-1, 1); }
-  x.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh);
-  return c;
-}
-const cssColor = v => { const e = document.createElement('i'); e.style.color = `var(${v})`; document.body.append(e); const c = getComputedStyle(e).color; e.remove(); return c; };
-function composeStrip(shots, text, filter) {
-  const two = shots.some(s => s.r), W = 640, pad = 28, gap = 10, cw = two ? (W - pad * 2 - gap) / 2 : W - pad * 2, ch = cw * .75;
-  const head = 88, foot = 64, H = head + shots.length * (ch + gap) - gap + foot + pad;
-  const c = $('strip'); c.width = W; c.height = H; const x = c.getContext('2d');
-  x.fillStyle = '#fffdf8'; x.fillRect(0, 0, W, H);
-  const A = cssColor('--a'), B = cssColor('--b');
-  for (let i = 0; i < W; i += 40) { x.fillStyle = (i / 40) % 2 ? B : A; x.beginPath(); x.moveTo(i, 0); x.lineTo(i + 20, 0); x.lineTo(i + 12, 10); x.lineTo(i - 8, 10); x.fill(); }
-  x.fillStyle = B; x.textAlign = 'center'; x.font = '700 44px Caveat, cursive'; x.fillText(text || 'Nous deux ♥', W / 2, 66);
-  shots.forEach((s, i) => {
-    const y = head + i * (ch + gap);
-    x.save(); x.filter = filter || 'none';
-    x.drawImage(s.l, pad, y, cw, ch);
-    if (two && s.r) x.drawImage(s.r, pad + cw + gap, y, cw, ch);
-    x.restore();
-  });
-  x.fillStyle = '#7a7a8a'; x.font = '500 22px "DM Sans", sans-serif';
-  x.fillText(new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, H - pad - 8);
-  $('boothDl').href = c.toDataURL('image/jpeg', .9);
-  return new Promise(r => c.toBlob(r, 'image/jpeg', .9));
-}
-async function runBooth({ at, filter, text }) {
-  if (boothBusy) return; boothBusy = true;
-  location.hash = 'appel'; $('boothPanel').hidden = false; $('boothResult').hidden = true;
-  try { await getCam(!inCall ? false : true); } catch (e) { boothBusy = false; return; }
-  const shots = [], cnt = $('boothCount'), fl = $('flash');
-  const wait = ms => new Promise(r => setTimeout(r, Math.max(0, ms)));
-  for (let k = 0; k < 4; k++) {
-    const shotAt = at + k * 3500;
-    cnt.hidden = false;
-    for (let n = 3; n > 0; n--) { await wait(shotAt - (n * 900) - Date.now()); cnt.textContent = n; }
-    await wait(shotAt - Date.now());
-    cnt.textContent = ''; fl.classList.add('on'); setTimeout(() => fl.classList.remove('on'), 60);
-    const remoteOk = vR.srcObject && vR.videoWidth;
-    shots.push({ l: grab(vL, true), r: remoteOk ? grab(vR, false) : null });
-  }
-  cnt.hidden = true;
-  stripBlob = await composeStrip(shots, text, filter);
-  $('boothResult').hidden = false; boothBusy = false;
-  if (!inCall) { local?.getTracks().forEach(t => t.stop()); local = null; vL.srcObject = null; buttons(); }
-  $('boothResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
+let boothBusy = false;
+export const callActive = () => inCall;
+export async function boothCam() { boothBusy = true; await getCam(inCall); return { vL, vR }; }
+export function boothRelease() { boothBusy = false; if (!inCall) { local?.getTracks().forEach(t => t.stop()); local = null; vL.srcObject = null; buttons(); } }
 
 /* --- Mini-appel flottant quand on quitte l'onglet Appel pendant un appel --- */
 let view = 'nous';
@@ -325,30 +277,12 @@ export function initCall() {
   listDevices();
   vS.addEventListener('click', () => { if (!screen) vS.muted = false; vS.play?.().catch(() => { }); info(''); });
   $('fullBtn').onclick = () => { const c = $('cinema'); if (document.fullscreenElement) document.exitFullscreen(); else (c.requestFullscreen || c.webkitRequestFullscreen)?.call(c)?.catch?.(() => { }); };
-  $('boothBtn').onclick = () => { $('boothPanel').hidden = !$('boothPanel').hidden; };
-  $('boothGo').onclick = () => {
-    const cfg = { at: Date.now() + 3200, filter: $('boothFilter').value, text: $('boothText').value.trim().slice(0, 40) };
-    if (inCall) send('booth', cfg);
-    runBooth(cfg);
-  };
-  $('boothSave').onclick = async () => {
-    if (!stripBlob) return;
-    $('boothSave').disabled = true;
-    try {
-      const path = await uploadPhoto(stripBlob, 'booth');
-      await q(sb.from('memories').insert({ couple_id: st.couple.id, path, caption: $('boothText').value.trim().slice(0, 200) || 'Photobooth ♥', kind: 'strip' }));
-      toast('Ajouté aux souvenirs ♥'); loadTable('memories');
-    } catch (e) { toast('Envoi impossible.'); }
-    $('boothSave').disabled = false;
-  };
-
   listen('call-ring', () => { if (inCall) { if (!pc) { makePC(); send('call-join', {}); } } else showRing(true); });
   listen('call-join', () => { if (inCall && !pc) { stageMsg('Connexion…'); makePC(); } });
   listen('call-end', p => { if (ringing) showRing(false); if (inCall) { hangup(false); toast(p.declined ? partnerName() + ' ne peut pas maintenant' : partnerName() + ' a raccroché'); } });
   listen('sig', onSig);
   listen('mic', p => info(p.silent ? '⚠️ Le micro de ' + partnerName() + ' n\'envoie aucun son (son navigateur n\'a pas accès au micro).' : ''));
   listen('screen', p => { remoteScreenId = p.on ? String(p.id || '') : null; if (!p.on) { for (const id of [...remoteStreams.keys()]) if (id !== remoteCamId) remoteStreams.delete(id); } routeStreams(); if (p.on) { location.hash = 'appel'; dispatch('cine-auto', true); toast(partnerName() + (p.audio === false ? ' partage son écran, mais sans le son' : ' partage son écran')); vS.muted = false; resume(); } });
-  listen('booth', p => { if (typeof p.at === 'number' && Math.abs(p.at - Date.now()) < 15000) runBooth({ at: p.at, filter: String(p.filter || 'none'), text: String(p.text || '').slice(0, 40) }); });
   listen('presence', h => { const was = here; here = h; if (h && !was && inCall && !pc) send('call-ring', {}); });
   listen('presence', here => { if (!here && inCall && pc) info(partnerName() + ' a quitté l\'app.'); });
   addEventListener('beforeunload', () => { if (inCall) send('call-end', {}); });

@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,500&family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=16">
+<link rel="stylesheet" href="style.css?v=17">
 </head>
 <body>
 <div class="stripe"></div>
@@ -140,11 +140,38 @@
   <p class="mute center" id="callInfo"></p>
   <div class="card" id="boothPanel" hidden>
     <h2>Photobooth</h2>
-    <div class="row"><label style="flex:1 1 160px">Filtre<select id="boothFilter"><option value="none">Naturel</option><option value="grayscale(1) contrast(1.1)">Noir & blanc</option><option value="sepia(.75) contrast(1.05)">Sépia</option><option value="contrast(1.15) saturate(1.45)">Vif</option><option value="saturate(.8) hue-rotate(-10deg) brightness(1.05) contrast(.95)">Vintage</option></select></label>
-      <label style="flex:1 1 160px">Légende<input id="boothText" maxlength="40" placeholder="Nous deux ♥"></label></div>
-    <div class="row"><button id="boothGo">Lancer (4 photos)</button></div>
-    <div id="boothResult" hidden><canvas id="strip" class="strip"></canvas>
-      <div class="row center"><button id="boothSave">Garder dans les souvenirs</button><a class="btn ghost" id="boothDl" download="nous-deux-photobooth.jpg">Télécharger</a></div></div>
+    <div class="boothOpts">
+      <label>Photos<select id="bShots"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></label>
+      <label>Décompte<select id="bCount"><option value="3" selected>3 s</option><option value="5">5 s</option><option value="10">10 s</option></select></label>
+      <label>Filtre<select id="bFilter"></select></label>
+      <label>Mise en page<select id="bLayout"><option value="strip">Bande verticale</option><option value="grid">Grille</option><option value="polaroid">Polaroïds</option><option value="postcard">Carte postale</option></select></label>
+      <label>Cadre<select id="bFrame"><option value="avion">Par avion</option><option value="coeurs">Cœurs</option><option value="film">Pellicule</option><option value="nuit">Nuit étoilée</option><option value="simple">Simple</option></select></label>
+      <label>Légende<input id="boothText" maxlength="40" placeholder="Nous deux ♥"></label>
+    </div>
+    <div class="row"><button id="boothGo">📸 Lancer</button><span class="mute">Pendant un appel, vous êtes pris en photo tous les deux en même temps.</span></div>
+    <div id="boothResult" hidden>
+      <p class="mute">Touche une miniature pour reprendre cette photo. Tu peux changer filtre, mise en page et cadre sans reprendre les photos.</p>
+      <div class="thumbs" id="bThumbs"></div>
+      <div class="boothEdit">
+        <div class="boothCanvas"><canvas id="strip" class="strip"></canvas></div>
+        <div class="boothTools">
+          <b>Stickers</b>
+          <div class="stickers" id="bStickers"></div>
+          <b>Texte</b>
+          <div class="row"><input id="bText" maxlength="40" placeholder="Écris un mot doux…"><input type="color" id="bColor" value="#e63962" aria-label="Couleur du texte"></div>
+          <div class="row"><select id="bFont" style="flex:1 1 140px"><option value="Caveat">Manuscrite</option><option value="Dancing Script">Romantique</option><option value="Playfair Display">Élégante</option><option value="Fredoka">Ronde</option></select><button class="ghost" id="bAddText">Ajouter le texte</button></div>
+          <div id="bSel" hidden>
+            <b>Élément sélectionné</b>
+            <label>Taille<input type="range" id="bSize" min="20" max="400" value="80"></label>
+            <label>Rotation<input type="range" id="bRot" min="-45" max="45" value="0"></label>
+            <div class="row"><button class="ghost" id="bDel">Supprimer</button></div>
+          </div>
+          <p class="mute">Fais glisser un sticker ou un texte sur la photo pour le déplacer.</p>
+        </div>
+      </div>
+      <div class="row center"><button id="boothSave">Garder dans les souvenirs</button><a class="btn ghost" id="boothDl" download="nous-deux-photobooth.jpg">Télécharger</a><button class="ghost" id="bGif">🎞️ Créer un GIF animé</button></div>
+      <div id="gifBox" hidden class="center"><img id="gifImg" alt="GIF animé" class="strip"><div class="row center"><button id="gifSave">Garder le GIF</button><a class="btn ghost" id="gifDl" download="nous-deux.gif">Télécharger le GIF</a></div></div>
+    </div>
   </div>
 </section>
 
@@ -358,6 +385,6 @@
 </div>
 <p id="status" class="status" hidden></p>
 <div id="toast"></div>
-<script type="module" src="js/app.js?v=16"></script>
+<script type="module" src="js/app.js?v=17"></script>
 </body>
 </html>

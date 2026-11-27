@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1/+esm';
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=16';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=17';
 
 export const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
@@ -59,8 +59,9 @@ async function shrink(file, max = 1800) {
   } catch (e) { return file; }
 }
 export async function uploadPhoto(fileOrBlob, prefix = 'p') {
-  const blob = fileOrBlob instanceof Blob && fileOrBlob.type === 'image/jpeg' && !(fileOrBlob instanceof File) ? fileOrBlob : await shrink(fileOrBlob);
-  const ext = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : 'jpg';
+  const raw = fileOrBlob instanceof Blob && !(fileOrBlob instanceof File) && /^image\/(jpeg|gif)$/.test(fileOrBlob.type);
+  const blob = raw || fileOrBlob.type === 'image/gif' ? fileOrBlob : await shrink(fileOrBlob);
+  const ext = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : blob.type === 'image/gif' ? 'gif' : 'jpg';
   const path = `${st.couple.id}/${prefix}-${uid()}.${ext}`;
   const { error } = await sb.storage.from('photos').upload(path, blob, { contentType: blob.type || 'image/jpeg', upsert: false });
   if (error) throw error;

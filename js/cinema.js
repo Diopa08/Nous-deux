@@ -1,4 +1,4 @@
-import { sb, st, $, esc, fmt, toast, floatEmo, nameOf, partnerName, q, listen, send, onTable, loadTable } from './core.js?v=16';
+import { sb, st, $, esc, fmt, toast, floatEmo, nameOf, partnerName, q, listen, send, onTable, loadTable } from './core.js?v=17';
 
 /* =========================================================
    Mode ciné : film en grand, visages en bulles, chat et réactions

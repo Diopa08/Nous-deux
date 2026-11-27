@@ -1,9 +1,10 @@
 import { sb, st, $, esc, fmt, uid, toast, floatEmo, nameOf, partnerName, q, oops, signedUrls, cachedUrl, uploadPhoto,
-  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=16';
-import { initGames } from './games.js?v=16';
-import { initGames2 } from './games2.js?v=16';
-import { initCall } from './call.js?v=16';
-import { initCinema } from './cinema.js?v=16';
+  listen, dispatch, send, onGame, setGameLocal, saveGame, onTable, loadTable, TABLES } from './core.js?v=17';
+import { initGames } from './games.js?v=17';
+import { initGames2 } from './games2.js?v=17';
+import { initCall } from './call.js?v=17';
+import { initBooth } from './booth.js?v=17';
+import { initCinema } from './cinema.js?v=17';
 
 /* =========================================================
    Connexion
@@ -128,7 +129,7 @@ function subscribeLive() {
   // Canal public au nom impossible à deviner (identifiant secret du couple, visible seulement par vous deux)
   const ch = sb.channel('nd-' + cid, { config: { broadcast: { self: false }, presence: { key: st.me, enabled: true } } });
   st.chan = ch;
-  ['sig', 'call-ring', 'call-join', 'call-end', 'screen', 'draw', 'react', 'ping', 'booth', 'pz-pick', 'chat-new', 'mic'].forEach(ev => ch.on('broadcast', { event: ev }, ({ payload }) => dispatch(ev, payload)));
+  ['sig', 'call-ring', 'call-join', 'call-end', 'screen', 'draw', 'react', 'ping', 'booth', 'booth-re', 'pz-pick', 'chat-new', 'mic'].forEach(ev => ch.on('broadcast', { event: ev }, ({ payload }) => dispatch(ev, payload)));
   ch.on('presence', { event: 'sync' }, () => {
     const ids = Object.keys(ch.presenceState());
     const here = ids.some(id => id !== st.me);
@@ -407,5 +408,6 @@ initGames();
 initGames2();
 initCall();
 initCinema();
+initBooth();
 route();
 boot();
