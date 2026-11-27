@@ -1,4 +1,4 @@
-import { sb, st, $, esc, norm, uid, toast, floatEmo, nameOf, partnerName, q, signedUrls, cachedUrl, listen, send, onGame, saveGame, onTable, loadTable } from './core.js?v=15';
+import { sb, st, $, esc, norm, uid, toast, floatEmo, nameOf, partnerName, q, signedUrls, cachedUrl, listen, send, onGame, saveGame, onTable, loadTable } from './core.js?v=16';
 
 const QUESTIONS = ["Quel moment avec moi revivrais-tu encore et encore ?", "Qu'est-ce qui te manque le plus chez moi cette semaine ?", "Où est-ce qu'on vivra dans 5 ans ?", "Quelle petite habitude à moi te fait sourire ?", "Quel serait notre voyage de rêve ?", "Quelle chanson te fait penser à nous ?", "Que veux-tu qu'on fasse en premier quand on se revoit ?", "Ton souvenir préféré de notre premier rendez-vous ?", "Qu'est-ce que je fais qui te fait te sentir aimé·e ?", "Un rêve que tu n'as jamais dit à personne ?", "Une journée entière sans contrainte : on fait quoi ?", "Qu'as-tu appris sur toi depuis qu'on est ensemble ?"];
 const TP = [["Un appel vidéo de 3 h", "10 vocaux surprises dans la journée"], ["Un week-end à la plage", "Un week-end à la montagne"], ["Cuisiner ensemble", "Aller au resto"], ["Une lettre écrite à la main", "Une playlist faite pour toi"], ["Un film d'horreur", "Une comédie romantique"], ["Le lever du soleil", "Les étoiles tard le soir"], ["Un voyage surprise", "Un voyage planifié ensemble"], ["Danser toute la nuit", "Une soirée canapé"]];
@@ -137,26 +137,70 @@ export function initGames() {
   const draw = t => { const list = t === 'a' ? ACTIONS : VERITES, a = g('aov'); let i; do { i = Math.floor(Math.random() * list.length); } while (a && a.t === t && a.i === i); saveGame('aov', { t, i, by: st.me, at: Date.now() }); };
   $('aovA').onclick = () => draw('a'); $('aovV').onclick = () => draw('v');
 
-  /* ---------------- Morpion ---------------- */
+  /* ---------------- Morpion : classique, géant (5 alignés) ou Super morpion ---------------- */
   const LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+  const SIZE = { c3: 9, g10: 100, u: 81 };
+  const mfresh = (mode, x = '', o = '') => ({ mode, board: Array(SIZE[mode]).fill(''), small: Array(9).fill(''), next: -1, turn: 'X', x, o, winner: '', line: [], last: -1 });
+  const mcur = () => { const m = g('morpion'); if (!m) return mfresh('c3'); const mode = SIZE[m.mode] ? m.mode : 'c3'; return Array.isArray(m.board) && m.board.length === SIZE[mode] ? { ...m, mode } : mfresh(mode, m.x, m.o); };
+  const small3 = (cells) => { for (const l of LINES) { const v = cells[l[0]]; if (v && v !== 'nul' && l.every(k => cells[k] === v)) return v; } return cells.every(Boolean) ? 'nul' : ''; };
+  function gomoku(b, i, mine) {
+    const N = 10, r0 = Math.floor(i / N), c0 = i % N;
+    for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+      const line = [i];
+      for (const sg of [1, -1]) { let r = r0 + dr * sg, c = c0 + dc * sg; while (r >= 0 && r < N && c >= 0 && c < N && b[r * N + c] === mine) { line.push(r * N + c); r += dr * sg; c += dc * sg; } }
+      if (line.length >= 5) return line;
+    }
+    return null;
+  }
+  const sym = v => v === 'X' ? '✕' : v === 'O' ? '○' : '';
   function renderMorp() {
-    const m = g('morpion') || { board: Array(9).fill(''), turn: 'X' }, b = Array.isArray(m.board) && m.board.length === 9 ? m.board : Array(9).fill('');
-    $('board').innerHTML = b.map((v, i) => `<button data-c="${i}" class="${v === 'O' ? 'o' : ''}" aria-label="Case ${i + 1}">${v === 'X' ? '✕' : v === 'O' ? '○' : ''}</button>`).join('');
-    const mine = m.x === st.me ? 'X' : m.o === st.me ? 'O' : null;
-    $('mStatus').textContent = m.winner ? (m.winner === 'nul' ? 'Match nul !' : (m.winner === mine ? 'Tu as gagné ♥' : 'Gagné par ' + nameOf(m.winner === 'X' ? m.x : m.o))) :
-      (!m.x || !m.o) ? 'Joue une case pour rejoindre la partie.' : (m.turn === mine ? 'À toi de jouer (' + (mine === 'X' ? '✕' : '○') + ')' : 'Au tour de ' + nameOf(m.turn === 'X' ? m.x : m.o));
+    const m = mcur(), mine = m.x === st.me ? 'X' : m.o === st.me ? 'O' : null, b = m.board, line = m.line || [];
+    $('mMode').value = m.mode;
+    const el = $('board'); el.className = 'board mode-' + m.mode;
+    if (m.mode === 'u') {
+      el.innerHTML = Array.from({ length: 9 }, (_, sb) => {
+        const won = m.small[sb], active = !m.winner && !won && (m.next < 0 || m.next === sb);
+        return `<div class="sub${active ? ' active' : ''}${won ? ' won' : ''}">${Array.from({ length: 9 }, (_, c) => { const i = sb * 9 + c, v = b[i]; return `<button data-c="${i}" class="${v === 'O' ? 'o' : ''}${i === m.last ? ' last' : ''}" aria-label="Grille ${sb + 1}, case ${c + 1}">${sym(v)}</button>`; }).join('')}${won ? `<span class="big ${won === 'O' ? 'o' : ''}">${won === 'nul' ? '=' : sym(won)}</span>` : ''}</div>`;
+      }).join('');
+    } else {
+      el.innerHTML = b.map((v, i) => `<button data-c="${i}" class="${v === 'O' ? 'o' : ''}${line.includes(i) ? ' win' : ''}${i === m.last ? ' last' : ''}" aria-label="Case ${i + 1}">${sym(v)}</button>`).join('');
+    }
+    const rule = m.mode === 'g10' ? 'Aligne 5 symboles. ' : m.mode === 'u' ? 'Gagne 3 petites grilles alignées. La case que tu joues envoie l\'autre dans la grille correspondante. ' : '';
+    $('mStatus').textContent = rule + (m.winner ? (m.winner === 'nul' ? 'Match nul !' : (m.winner === mine ? '🎉 Tu as gagné !' : 'Gagné par ' + nameOf(m.winner === 'X' ? m.x : m.o))) :
+      (!m.x || !m.o) ? 'Joue une case pour rejoindre la partie.' : (m.turn === mine ? 'À toi de jouer (' + sym(mine) + ')' : 'Au tour de ' + nameOf(m.turn === 'X' ? m.x : m.o)));
   }
   renderMorp(); onGame('morpion', renderMorp);
   $('board').onclick = e => {
     const c = e.target.closest('[data-c]'); if (!c) return;
-    const m = clone(g('morpion') || { board: Array(9).fill(''), turn: 'X' }); if (!Array.isArray(m.board) || m.board.length !== 9) m.board = Array(9).fill(''); if (m.winner) return;
+    const m = clone(mcur()); if (m.winner) return toast('Partie terminée : relance une partie.');
     if (!m.x) m.x = st.me; else if (!m.o && m.x !== st.me) m.o = st.me;
     const mine = m.x === st.me ? 'X' : m.o === st.me ? 'O' : null, i = +c.dataset.c;
-    if (!mine || m.turn !== mine || m.board[i]) return toast(mine ? 'Pas ton tour' : 'La partie est complète');
-    m.board[i] = mine; m.turn = mine === 'X' ? 'O' : 'X'; m.winner = LINES.some(l => l.every(k => m.board[k] === mine)) ? mine : (m.board.every(Boolean) ? 'nul' : '');
+    if (!mine) return toast('La partie est complète');
+    if (m.turn !== mine) return toast('Pas ton tour');
+    if (m.board[i]) return;
+    if (m.mode === 'u') {
+      const sb = Math.floor(i / 9);
+      if (m.small[sb]) return toast('Cette grille est déjà terminée');
+      if (m.next >= 0 && m.next !== sb) return toast('Tu dois jouer dans la grille en surbrillance');
+      m.board[i] = mine;
+      m.small[sb] = small3(m.board.slice(sb * 9, sb * 9 + 9));
+      const target = i % 9; m.next = m.small[target] ? -1 : target;
+      const big = LINES.find(l => l.every(k => m.small[k] === mine));
+      m.winner = big ? mine : (m.small.every(Boolean) ? 'nul' : '');
+    } else if (m.mode === 'g10') {
+      m.board[i] = mine; const l = gomoku(m.board, i, mine);
+      if (l) { m.winner = mine; m.line = l; } else if (m.board.every(Boolean)) m.winner = 'nul';
+    } else {
+      m.board[i] = mine; const l = LINES.find(l => l.every(k => m.board[k] === mine));
+      if (l) { m.winner = mine; m.line = l; } else if (m.board.every(Boolean)) m.winner = 'nul';
+    }
+    m.last = i; m.turn = mine === 'X' ? 'O' : 'X';
+    if (m.winner && m.winner !== 'nul') floatEmo('🎉');
     saveGame('morpion', m);
   };
-  $('mReset').onclick = () => { const m = g('morpion'); saveGame('morpion', { board: Array(9).fill(''), turn: 'X', x: m?.o || '', o: m?.x || '', winner: '' }); };
+  const newGame = mode => { const m = g('morpion'); saveGame('morpion', mfresh(mode, m?.o || '', m?.x || '')); };
+  $('mReset').onclick = () => newGame($('mMode').value);
+  $('mMode').onchange = () => newGame($('mMode').value);
 
   /* ---------------- Question du jour ---------------- */
   function renderQ() {
