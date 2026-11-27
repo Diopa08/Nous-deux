@@ -49,6 +49,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .list{list-style:none;padding:0;margin:10px 0 0}.list li{padding:12px 0;border-top:1px dashed var(--line);display:flex;gap:10px;align-items:flex-start}
 .list li:first-child{border-top:0}.list li>div{flex:1}
 .x{background:none;color:var(--mute);padding:4px 10px;min-height:36px;font-weight:400}
+.pw{position:relative;display:block}.pw input{padding-right:52px}.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);margin-top:2px;background:none;padding:0;width:44px;min-height:40px;font-size:18px;color:var(--ink)}
 .code{font-size:22px;letter-spacing:.15em;color:var(--a)}
 .status{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:999px;font-size:14px;z-index:20}
 /* Ring */

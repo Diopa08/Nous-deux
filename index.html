@@ -20,7 +20,8 @@
     <p class="mute">Notre petit coin à nous, malgré les kilomètres.</p>
     <form id="authForm">
       <label>Email<input type="email" id="aEmail" autocomplete="email" required></label>
-      <label>Mot de passe<input type="password" id="aPass" autocomplete="current-password" minlength="6" required></label>
+      <label>Mot de passe<span class="pw"><input type="password" id="aPass" autocomplete="current-password" minlength="6" required><button type="button" class="eye" data-eye="aPass" aria-label="Afficher le mot de passe">👁️</button></span></label>
+      <label id="aPass2Wrap" hidden>Confirme le mot de passe<span class="pw"><input type="password" id="aPass2" autocomplete="new-password" minlength="6"><button type="button" class="eye" data-eye="aPass2" aria-label="Afficher le mot de passe">👁️</button></span></label>
       <div class="row"><button type="submit" id="aBtn">Se connecter</button><button type="button" class="ghost" id="aSwitch">Créer un compte</button></div>
       <p class="mute" id="aMsg"></p>
     </form>

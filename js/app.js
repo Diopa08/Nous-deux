@@ -7,10 +7,12 @@ import { initCall } from './call.js';
    Connexion
    ========================================================= */
 let signup = false;
-$('aSwitch').onclick = () => { signup = !signup; $('aBtn').textContent = signup ? 'Créer mon compte' : 'Se connecter'; $('aSwitch').textContent = signup ? 'J\'ai déjà un compte' : 'Créer un compte'; $('aPass').autocomplete = signup ? 'new-password' : 'current-password'; $('aMsg').textContent = ''; };
+$('aSwitch').onclick = () => { signup = !signup; $('aBtn').textContent = signup ? 'Créer mon compte' : 'Se connecter'; $('aSwitch').textContent = signup ? 'J\'ai déjà un compte' : 'Créer un compte'; $('aPass').autocomplete = signup ? 'new-password' : 'current-password'; $('aPass2Wrap').hidden = !signup; $('aPass2').required = signup; $('aMsg').textContent = ''; };
+document.addEventListener('click', e => { const b = e.target.closest('[data-eye]'); if (!b) return; const i = $(b.dataset.eye), show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.textContent = show ? '🙈' : '👁️'; b.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'); });
 $('authForm').onsubmit = async e => {
   e.preventDefault();
   const email = $('aEmail').value.trim(), password = $('aPass').value;
+  if (signup && password !== $('aPass2').value) { $('aMsg').textContent = 'Les deux mots de passe ne sont pas identiques.'; return; }
   $('aBtn').disabled = true; $('aMsg').textContent = '…';
   try {
     if (signup) {
