@@ -116,6 +116,12 @@ function subscribe() {
   dbc.on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: f }, () => later('members', loadMembers));
   dbc.subscribe();
 
+  subscribeLive();
+}
+
+let liveRetries = 0;
+function subscribeLive() {
+  const cid = st.couple.id;
   const ch = sb.channel('couple:' + cid, { config: { private: true, broadcast: { self: false }, presence: { key: st.me } } });
   st.chan = ch;
   ['sig', 'call-ring', 'call-join', 'call-end', 'screen', 'draw', 'react', 'ping', 'booth', 'pz-pick'].forEach(ev => ch.on('broadcast', { event: ev }, ({ payload }) => dispatch(ev, payload)));
@@ -125,10 +131,17 @@ function subscribe() {
     const o = $('online'); o.textContent = here ? '● ' + partnerName() + ' est là' : 'Seul·e ici'; o.classList.toggle('on', here);
     dispatch('presence', here);
   });
-  sb.realtime.setAuth();
-  ch.subscribe(async s => { if (s === 'SUBSCRIBED') await ch.track({ at: Date.now() }); });
-  sb.auth.onAuthStateChange((ev, sess) => { if (ev === 'TOKEN_REFRESHED' && sess) sb.realtime.setAuth(sess.access_token); });
+  const join = async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) await sb.realtime.setAuth(session.access_token);
+    ch.subscribe(async s => {
+      if (s === 'SUBSCRIBED') { liveRetries = 0; st.live = true; dispatch('live', true); await ch.track({ at: Date.now() }); }
+      else if ((s === 'CHANNEL_ERROR' || s === 'TIMED_OUT') && liveRetries < 6) { st.live = false; dispatch('live', false); liveRetries++; await sb.removeChannel(ch).catch(() => { }); setTimeout(subscribeLive, 1500 * liveRetries); }
+    });
+  };
+  join();
 }
+sb.auth.onAuthStateChange((ev, sess) => { if (ev === 'TOKEN_REFRESHED' && sess) sb.realtime.setAuth(sess.access_token); });
 
 /* =========================================================
    Navigation

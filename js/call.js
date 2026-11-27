@@ -5,7 +5,7 @@ import { sb, st, $, toast, floatEmo, partner, partnerName, listen, send, uploadP
    Négociation « parfaite » : chaque côté peut renégocier (partage d'écran).
    ========================================================= */
 let pc = null, local = null, screen = null, screenSenders = [], inCall = false, ringing = false;
-let makingOffer = false, ignoreOffer = false, remoteCamId = null, remoteScreenId = null;
+let here = false, makingOffer = false, ignoreOffer = false, remoteCamId = null, remoteScreenId = null;
 const remoteStreams = new Map();
 const stage = $('stage'), vL = $('vLocal'), vR = $('vRemote'), vS = $('vScreen');
 const canShare = !!navigator.mediaDevices?.getDisplayMedia;
@@ -113,7 +113,9 @@ function showRing(on) { ringing = on; $('ring').hidden = !on; $('ringText').text
 
 async function startCall() {
   try { await getCam(); } catch (e) { return; }
-  inCall = true; stageMsg('Ça sonne chez ' + partnerName() + '…'); info('');
+  if (!st.live) { toast('Connexion temps réel pas encore prête, réessaie dans quelques secondes.'); local?.getTracks().forEach(t => t.stop()); local = null; vL.srcObject = null; buttons(); return; }
+  inCall = true; info('');
+  stageMsg(here ? 'Ça sonne chez ' + partnerName() + '…' : partnerName() + ' n\'a pas l\'app ouverte : la sonnerie arrivera dès qu\'il l\'ouvre.');
   send('call-ring', {}); buttons();
   clearTimeout(startCall.t); startCall.t = setTimeout(() => { if (inCall && !pc) { stageMsg(partnerName() + ' ne répond pas. Réessaie plus tard ♥'); } }, 45000);
 }
@@ -239,6 +241,7 @@ export function initCall() {
   listen('sig', onSig);
   listen('screen', p => { remoteScreenId = p.on ? String(p.id || '') : null; if (!p.on) { for (const id of [...remoteStreams.keys()]) if (id !== remoteCamId) remoteStreams.delete(id); } routeStreams(); if (p.on) { location.hash = 'appel'; toast(partnerName() + ' partage son écran'); } });
   listen('booth', p => { if (typeof p.at === 'number' && Math.abs(p.at - Date.now()) < 15000) runBooth({ at: p.at, filter: String(p.filter || 'none'), text: String(p.text || '').slice(0, 40) }); });
+  listen('presence', h => { const was = here; here = h; if (h && !was && inCall && !pc) send('call-ring', {}); });
   listen('presence', here => { if (!here && inCall && pc) info(partnerName() + ' a quitté l\'app.'); });
   addEventListener('beforeunload', () => { if (inCall) send('call-end', {}); });
 }
